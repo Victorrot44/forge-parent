@@ -42,7 +42,7 @@ public enum DefaultErrors implements ErrorDescriptor {
     }
 
     @Override
-    public String message() {
+    public String defaultMessage() {
         return message;
     }
 
@@ -63,7 +63,7 @@ public enum DefaultErrors implements ErrorDescriptor {
 
     @Override
     public String toString() {
-        return "%s (%s): %s".formatted(code(), severity(), message());
+        return "%s (%s): %s".formatted(code(), severity(), defaultMessage());
     }
 
 }

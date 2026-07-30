@@ -1,10 +1,10 @@
-package io.github.victorrot44.forge.web.core.exception;
+package io.github.victorrot44.forge.web.core.exception.response;
 
 import io.github.victorrot44.forge.web.core.error.ErrorDescriptor;
 
 import java.util.Map;
 
-public final class AuthorizationException extends ForgeException {
+public final class AuthorizationException extends ForgeResponseException {
 
     private static final long serialVersionUID = 1L;
 

@@ -5,7 +5,7 @@ import java.io.Serializable;
 public interface ErrorDescriptor extends Serializable {
 
     String code();
-    String message();
+    String defaultMessage();
     int httpStatus();
     ErrorCategory category();
     ErrorSeverity severity();

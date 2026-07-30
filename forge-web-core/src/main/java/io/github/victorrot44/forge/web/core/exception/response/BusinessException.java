@@ -1,10 +1,10 @@
-package io.github.victorrot44.forge.web.core.exception;
+package io.github.victorrot44.forge.web.core.exception.response;
 
 import io.github.victorrot44.forge.web.core.error.ErrorDescriptor;
 
 import java.util.Map;
 
-public abstract non-sealed class BusinessException extends ForgeException {
+public abstract non-sealed class BusinessException extends ForgeResponseException {
 
     private static final long serialVersionUID = 1L;
 
