@@ -7,6 +7,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>forge-web-core</module>
+        <module>forge-web-autoconfigure</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
