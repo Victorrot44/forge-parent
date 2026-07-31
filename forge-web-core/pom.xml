@@ -11,6 +11,14 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <exec.mainClass>io.github.victorrot44.forge.web.core.ForgeWebCore</exec.mainClass>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.46</version>
+        </dependency>
+    </dependencies>
+
 </project>

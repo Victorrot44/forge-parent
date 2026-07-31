@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="forge-web-core" />
         <module name="forge-web-autoconfigure" />
+        <module name="forge-web-starter" />
       </profile>
     </annotationProcessing>
   </component>

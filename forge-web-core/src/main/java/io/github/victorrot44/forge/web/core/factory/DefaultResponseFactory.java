@@ -39,7 +39,7 @@ public final class DefaultResponseFactory implements ResponseFactory {
     }
 
     private ErrorResponse.Builder errorBuilder(ErrorDescriptor descriptor) {
-        return errorBuilder(descriptor.httpStatus(), descriptor.code(), descriptor.message());
+        return errorBuilder(descriptor.httpStatus(), descriptor.code(), descriptor.defaultMessage());
     }
 
     private ErrorResponse.Builder errorBuilder(int status, String code, String message) {

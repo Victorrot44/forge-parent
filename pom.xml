@@ -8,6 +8,7 @@
     <modules>
         <module>forge-web-core</module>
         <module>forge-web-autoconfigure</module>
+        <module>forge-web-starter</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

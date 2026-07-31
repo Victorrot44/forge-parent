@@ -1,4 +1,4 @@
-package io.github.victorrot44.forge.web.autoconfigure;
+package io.github.victorrot44.forge.web.autoconfigure.context;
 
 import io.github.victorrot44.forge.web.core.context.ForgeContext;
 import io.github.victorrot44.forge.web.core.context.ForgeContextManager;

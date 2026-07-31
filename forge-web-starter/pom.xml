@@ -9,7 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>forge-web-autoconfigure</artifactId>
+    <artifactId>forge-web-starter</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -18,16 +18,17 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>io.github.victorrot44</groupId>
-            <artifactId>forge-web-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-actuator-autoconfigure</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
             <version>3.5.14</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.victorrot44</groupId>
+            <artifactId>forge-web-autoconfigure</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -35,6 +36,7 @@
             <artifactId>lombok</artifactId>
             <version>1.18.46</version>
         </dependency>
+
     </dependencies>
 
 </project>
