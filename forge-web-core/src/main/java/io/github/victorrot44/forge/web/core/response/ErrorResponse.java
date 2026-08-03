@@ -15,9 +15,9 @@ public record ErrorResponse(
         String message,
         List<ErrorDetail> errors,
         ApiMetadata metadata
-) implements ApiResponse {
+) {
 
-    public static class Builder extends AbstractResponseBuilder<Builder> {
+    public static final class Builder extends AbstractResponseBuilder<Builder> {
 
         private final List<ErrorDetail> errors = new ArrayList<>();
 
@@ -31,14 +31,13 @@ public record ErrorResponse(
             return this;
         }
 
-        public Builder addError(String code, String location, String field, String message, Object value) {
-            this.errors.add(new ErrorDetail(code, location, field, message, value));
+        public Builder addError(ErrorDetail.Builder errorDetailBuilder) {
+            this.errors.add(errorDetailBuilder.build());
             return this;
         }
 
         public ErrorResponse build() {
             validate();
-            Preconditions.requireNotNullOrEmpty(this.errors);
             return new ErrorResponse(requestId, timestamp, httpStatus, code, message, errors, buildMetadata(null));
         }
 

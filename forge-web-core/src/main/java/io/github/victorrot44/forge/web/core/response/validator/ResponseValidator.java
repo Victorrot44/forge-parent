@@ -11,18 +11,14 @@ public final class ResponseValidator {
     }
 
     public static void validateSuccessResponse(SuccessResponse response) {
-        Preconditions.requireNotNullOrEmpty(response.requestId());
         Preconditions.requireNotNullOrEmpty(response.message());
         Preconditions.requireNotNullOrEmpty(response.code());
         Preconditions.requirePositiveGreaterZero(response.httpStatus());
     }
 
     public static void validateErrorResponse(ErrorResponse response) {
-        Preconditions.requireNotNullOrEmpty(response.requestId());
         Preconditions.requireNotNullOrEmpty(response.message());
         Preconditions.requireNotNullOrEmpty(response.code());
-        Preconditions.requirePositiveGreaterZero(response.httpStatus());
-        Preconditions.requireNotNullOrEmpty(response.errors());
-    }
+        Preconditions.requirePositiveGreaterZero(response.httpStatus());    }
 
 }

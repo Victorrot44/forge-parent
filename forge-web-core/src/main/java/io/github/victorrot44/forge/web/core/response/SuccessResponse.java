@@ -13,9 +13,9 @@ public record SuccessResponse<T>(
         String message,
         T data,
         ApiMetadata metadata
-) implements ApiResponse {
+) {
 
-    public static class Builder<T> extends AbstractResponseBuilder<Builder<T>> {
+    public static final class Builder<T> extends AbstractResponseBuilder<Builder<T>> {
 
         private T data;
         private Pagination pagination;

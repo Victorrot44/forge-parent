@@ -61,7 +61,6 @@ public abstract class AbstractResponseBuilder<T extends AbstractResponseBuilder<
     protected void validate() {
         Preconditions.requireNotNullOrEmpty(this.code);
         Preconditions.requireNotNullOrEmpty(this.message);
-        Preconditions.requireNotNullOrEmpty(this.requestId);
         Preconditions.requirePositiveGreaterZero(this.httpStatus);
     }
 
