@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>forge-web-autoconfigure</artifactId>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -26,8 +27,8 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-actuator-autoconfigure</artifactId>
-            <version>3.5.14</version>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>4.1.0</version>
         </dependency>
 
         <dependency>

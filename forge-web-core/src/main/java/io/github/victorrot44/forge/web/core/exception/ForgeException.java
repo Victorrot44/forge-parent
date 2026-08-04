@@ -1,36 +1,44 @@
 package io.github.victorrot44.forge.web.core.exception;
 
+import io.github.victorrot44.forge.web.core.error.ErrorCategory;
+import io.github.victorrot44.forge.web.core.error.ErrorType;
+import io.github.victorrot44.forge.web.core.util.Preconditions;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public abstract class ForgeException extends RuntimeException {
+public class ForgeException extends RuntimeException {
 
+    private final ErrorCategory errorCategory;
+    private final ErrorType errorType;
     private final Map<String, Object> details;
 
-    protected ForgeException(String message, Throwable cause, Map<String, Object> details) {
-        super(Objects.requireNonNull(message, "message cannot be null."), cause);
-        this.details = inmutableDetails(details);
+    public ForgeException(ErrorCategory errorCategory, ErrorType errorType, Map<String, Object> details, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCategory = Objects.requireNonNull(errorCategory, "errorCategory must not be null.");
+        this.errorType = Objects.requireNonNull(errorType, "errorType must not be null.");
+        this.details = Preconditions.immutableMap(details);
     }
 
-    protected ForgeException(String message, Map<String, Object> details) {
-        this(message, null, details);
+    public ForgeException(ErrorCategory errorCategory, ErrorType errorType, Map<String, Object> details, String message) {
+        this(errorCategory, errorType, details, message, null);
     }
 
-    protected ForgeException(String message, Throwable cause) {
-        this(message, cause, Map.of());
+    public ForgeException(ErrorCategory errorCategory, ErrorType errorType, String message, Throwable cause) {
+        this(errorCategory, errorType, Map.of(), message, cause);
     }
 
-    protected ForgeException(String message) {
-        this(message, null, Map.of());
+    public ForgeException(ErrorCategory errorCategory, ErrorType errorType, String message) {
+        this(errorCategory, errorType, Map.of(), message, null);
     }
 
-    private static Map<String, Object> inmutableDetails(Map<String, Object> details) {
-        return (details == null) ? Map.of() : Map.copyOf(details);
+    public ErrorCategory errorCategory() {
+        return errorCategory;
     }
 
-    public Map<String, Object> getDetails() {
-        return details;
+    public ErrorType errorType() {
+        return errorType;
     }
 
     public boolean hasDetails() {
@@ -40,6 +48,13 @@ public abstract class ForgeException extends RuntimeException {
     public <T> Optional<T> getDetail(String key, Class<T> type) {
         Object value = details.get(key);
         return type.isInstance(value) ? Optional.of(type.cast(value)) : Optional.empty();
+    }
+
+    public String detailsToString() {
+        if (!hasDetails()) {
+            return "";
+        }
+        return details.toString();
     }
 
 }

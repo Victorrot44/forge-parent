@@ -10,15 +10,16 @@ public final class ResponseValidator {
         throw new AssertionError("No instances. Utility class.");
     }
 
-    public static void validateSuccessResponse(SuccessResponse response) {
-        Preconditions.requireNotNullOrEmpty(response.message());
-        Preconditions.requireNotNullOrEmpty(response.code());
-        Preconditions.requirePositiveGreaterZero(response.httpStatus());
+    public static void validateSuccessResponse(String message, String code, int httpStatus) {
+        Preconditions.requireNotNullOrEmpty(message);
+        Preconditions.requireNotNullOrEmpty(code);
+        Preconditions.requirePositive(httpStatus);
     }
 
-    public static void validateErrorResponse(ErrorResponse response) {
-        Preconditions.requireNotNullOrEmpty(response.message());
-        Preconditions.requireNotNullOrEmpty(response.code());
-        Preconditions.requirePositiveGreaterZero(response.httpStatus());    }
+    public static void validateErrorResponse(String message, String code, int httpStatus) {
+        Preconditions.requireNotNullOrEmpty(message);
+        Preconditions.requireNotNullOrEmpty(code);
+        Preconditions.requirePositive(httpStatus);
+    }
 
 }

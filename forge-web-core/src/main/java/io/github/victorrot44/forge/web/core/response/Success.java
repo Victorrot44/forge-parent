@@ -6,9 +6,9 @@ public enum Success {
     CREATED(201, "CREATED", "Resource created successfully"),
     NO_CONTENT(204, "NO_CONTENT", "Operation completed successfully");
 
-    private int httpStatus;
-    private String code;
-    private String message;
+    private final int httpStatus;
+    private final String code;
+    private final String message;
 
     Success(int httpStatus, String code, String message) {
         this.httpStatus = httpStatus;

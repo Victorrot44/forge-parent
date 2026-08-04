@@ -1,6 +1,6 @@
 package io.github.victorrot44.forge.web.core.util;
 
-import java.util.List;
+import java.util.Map;
 
 public final class Preconditions {
 
@@ -8,34 +8,27 @@ public final class Preconditions {
         throw new AssertionError("No instances. Util class.");
     }
 
+    public static <K, V> Map<K, V> immutableMap(Map<K, V> map) {
+        return (map == null) ? Map.of() : Map.copyOf(map);
+    }
+
     public static String requireNotNullOrEmpty(String value) {
         return requireNotNullOrEmpty(value, "value is null or empty");
     }
 
     public static String requireNotNullOrEmpty(String value, String message) {
-        if (value == null || value.isEmpty()) {
+        if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(message);
         }
         return value;
     }
 
-    public static <T> List<T> requireNotNullOrEmpty(List<T> value) {
-        return requireNotNullOrEmpty(value, "value is null or empty");
+    public static <T extends Number> T requirePositive(T value) {
+        return requirePositive(value, "value must be greater than or equal to zero.");
     }
 
-    public static <T> List<T> requireNotNullOrEmpty(List<T> values, String message) {
-        if  (values == null || values.isEmpty()) {
-            throw new IllegalArgumentException(message);
-        }
-        return values;
-    }
-
-    public static <T extends Number> T requirePositiveGreaterZero(T value) {
-        return requirePositiveGreaterZero(value, "value is null or less than or equal to 0");
-    }
-
-    public static <T extends Number> T requirePositiveGreaterZero(T value, String message) {
-        if (value == null || value.doubleValue() <= 0) {
+    public static <T extends Number> T requirePositive(T value, String message) {
+        if (value == null || value.intValue() <= 0) {
             throw new IllegalArgumentException(message);
         }
         return value;

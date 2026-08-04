@@ -1,7 +1,6 @@
 package io.github.victorrot44.forge.web.core.response;
 
 import io.github.victorrot44.forge.web.core.response.builder.AbstractResponseBuilder;
-import io.github.victorrot44.forge.web.core.util.Preconditions;
 import io.github.victorrot44.forge.web.core.response.validator.ResponseValidator;
 
 import java.time.Instant;
@@ -49,7 +48,7 @@ public record ErrorResponse(
 
     public ErrorResponse {
         errors = (errors == null) ? List.of() : List.copyOf(errors);
-        ResponseValidator.validateErrorResponse(this);
+        ResponseValidator.validateErrorResponse(message, code, httpStatus);
     }
 
 }

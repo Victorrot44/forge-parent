@@ -47,7 +47,7 @@ public record SuccessResponse<T>(
     }
 
     public SuccessResponse {
-        ResponseValidator.validateSuccessResponse(this);
+        ResponseValidator.validateSuccessResponse(message, code, httpStatus);
     }
 
 }

@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>forge-web-starter</artifactId>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -38,5 +39,5 @@
         </dependency>
 
     </dependencies>
-
+    
 </project>
