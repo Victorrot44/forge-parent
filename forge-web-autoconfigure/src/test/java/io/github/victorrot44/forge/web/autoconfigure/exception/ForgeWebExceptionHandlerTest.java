@@ -1,6 +1,5 @@
-package io.github.victorrot44.forge.web.autoconfigure;
+package io.github.victorrot44.forge.web.autoconfigure.exception;
 
-import io.github.victorrot44.forge.web.autoconfigure.exception.ForgeWebExceptionHandler;
 import io.github.victorrot44.forge.web.core.error.ErrorCategory;
 import io.github.victorrot44.forge.web.core.error.ErrorType;
 import io.github.victorrot44.forge.web.core.exception.ForgeException;
@@ -197,7 +196,7 @@ class ForgeWebExceptionHandlerTest {
                     assertThat(error.details())
                             .containsEntry(
                                     "allowed",
-                                    Set.of("GET", "POST")
+                                    Set.of("GET", "POST").toArray()
                             );
                 });
     }
