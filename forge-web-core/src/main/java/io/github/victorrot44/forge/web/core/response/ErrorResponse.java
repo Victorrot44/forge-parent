@@ -35,6 +35,11 @@ public record ErrorResponse(
             return this;
         }
 
+        public Builder errors(List<ErrorDetail> errors) {
+            this.errors.addAll(errors);
+            return this;
+        }
+
         public ErrorResponse build() {
             validate();
             return new ErrorResponse(requestId, timestamp, httpStatus, code, message, errors, buildMetadata(null));
