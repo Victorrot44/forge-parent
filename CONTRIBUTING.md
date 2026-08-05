@@ -2,7 +2,7 @@
 
 ¡Gracias por tu interés en contribuir a Forge!
 
-Toda contribución, ya sea una corrección, una nueva funcionalidad, una mejora en la documentación o un reporte de errores, ayuda a construir una mejor librería para la comunidad.
+Toda contribución, ya sea una corrección, una nueva funcionalidad, una mejora en la documentación o un reporte de errores, ayuda a construir una librería más útil, estable y mantenible.
 
 ---
 
@@ -10,20 +10,23 @@ Toda contribución, ya sea una corrección, una nueva funcionalidad, una mejora 
 
 Esperamos que todas las interacciones dentro del proyecto sean respetuosas, profesionales y constructivas.
 
-Las discusiones técnicas son bienvenidas, pero siempre deben centrarse en mejorar el proyecto y no en las personas.
+Las discusiones técnicas son bienvenidas y deben centrarse en mejorar el proyecto y sus decisiones de diseño.
 
 ---
 
 # Antes de comenzar
 
-Antes de implementar una nueva funcionalidad, verifica si:
+Antes de implementar un cambio, verifica si:
 
-* ya existe una propuesta similar;
+* ya existe una propuesta o Issue relacionado;
 * el cambio está alineado con `PHILOSOPHY.md`;
 * respeta la arquitectura descrita en `ARCHITECTURE.md`;
-* no rompe la compatibilidad de la API pública.
+* mantiene la API pública pequeña;
+* evita introducir abstracciones especulativas;
+* no duplica una capacidad que ya proporciona Java, HTTP o Spring;
+* no rompe la compatibilidad pública existente.
 
-Si tienes dudas, abre primero una discusión o un Issue.
+Para cambios importantes se recomienda abrir primero una discusión o Issue.
 
 ---
 
@@ -40,45 +43,55 @@ Al crear un Issue incluye, siempre que sea posible:
 * descripción del problema;
 * pasos para reproducirlo;
 * comportamiento esperado;
-* comportamiento actual.
+* comportamiento actual;
+* stack trace o logs relevantes.
 
-Mientras más información proporciones, más sencillo será analizar el problema.
+Mientras más información proporciones, más sencillo será analizar y reproducir el problema.
 
 ---
 
 ## Proponer funcionalidades
 
-Antes de solicitar una nueva característica, pregúntate:
+Antes de solicitar una nueva característica, considera:
 
 * ¿Resuelve un problema recurrente?
-* ¿Puede beneficiar a la mayoría de los usuarios?
+* ¿Aporta un beneficio observable al consumidor?
+* ¿Reduce código repetitivo o complejidad?
 * ¿Mantiene la simplicidad de Forge?
+* ¿Puede implementarse sin introducir abstracciones innecesarias?
+* ¿Existe una API estándar que ya resuelva el problema?
 * ¿Encaja con la filosofía del proyecto?
+* ¿Puede incorporarse de forma independiente?
 
 No todas las propuestas serán aceptadas.
 
-Forge prioriza una API pequeña y consistente sobre incorporar una gran cantidad de funcionalidades.
+Forge prioriza una API pequeña, consistente y mantenible sobre incorporar una gran cantidad de funcionalidades.
 
 ---
 
-## Enviar un Pull Request
+# Enviar un Pull Request
 
 1. Haz un Fork del proyecto.
 2. Crea una rama descriptiva.
-
-```text
-feature/request-id
-feature/context
-fix/error-builder
-docs/readme
-refactor/response-factory
-```
-
-3. Implementa únicamente un cambio por Pull Request.
+3. Implementa un cambio enfocado.
 4. Agrega o actualiza las pruebas necesarias.
 5. Actualiza la documentación cuando corresponda.
 6. Verifica que el proyecto compile correctamente.
-7. Envía el Pull Request.
+7. Verifica que las pruebas existentes continúen funcionando.
+8. Envía el Pull Request.
+
+Ejemplos:
+
+```text id="h7u9zq"
+feature/request-id
+feature/http-logging
+fix/error-builder
+fix/method-not-allowed
+docs/readme
+refactor/response-builder
+```
+
+El nombre de la rama debe describir el cambio realizado y no la implementación interna utilizada.
 
 ---
 
@@ -87,27 +100,51 @@ refactor/response-factory
 Toda contribución debe cumplir los siguientes requisitos:
 
 * El proyecto compila sin errores.
-* No existen advertencias importantes.
 * Las pruebas existentes continúan funcionando.
-* Las nuevas funcionalidades incluyen pruebas.
-* El código sigue los estándares definidos por Forge.
-* La documentación permanece actualizada.
+* Las nuevas funcionalidades incluyen pruebas apropiadas.
+* No se introducen advertencias innecesarias.
+* El código mantiene las convenciones del proyecto.
+* La API pública permanece clara y mínima.
+* La documentación permanece actualizada cuando el cambio afecta al comportamiento público.
 
 ---
 
 # Principios de desarrollo
 
-Forge sigue los principios descritos en `PHILOSOPHY.md`.
+Forge sigue los principios definidos en `PHILOSOPHY.md`.
 
 En particular:
 
-* SOLID.
-* Responsabilidad única.
-* Composición sobre herencia.
-* Objetos inmutables siempre que sea posible.
-* APIs pequeñas.
-* Bajo acoplamiento.
-* Alta cohesión.
+* simplicidad antes que complejidad;
+* responsabilidad clara;
+* APIs pequeñas;
+* bajo acoplamiento;
+* alta cohesión;
+* inmutabilidad cuando sea apropiada;
+* composición cuando aporte valor;
+* evitar abstracciones especulativas;
+* utilizar estándares existentes antes de crear soluciones propias.
+
+Los principios de diseño deben aplicarse con criterio.
+
+No se introducirá una interfaz, patrón, clase o abstracción únicamente para cumplir una regla de diseño.
+
+---
+
+# API pública
+
+Todo elemento expuesto como parte de la API pública de Forge debe considerarse un contrato.
+
+Antes de modificar o eliminar una API pública debe evaluarse:
+
+* compatibilidad;
+* impacto para los consumidores;
+* posibilidad de mantener compatibilidad;
+* necesidad real del cambio.
+
+Una API pública no debe exponerse simplemente porque una implementación interna podría necesitarla.
+
+La visibilidad debe mantenerse lo más restrictiva posible.
 
 ---
 
@@ -115,29 +152,32 @@ En particular:
 
 Las modificaciones no deben romper la compatibilidad pública sin una justificación sólida.
 
-Cuando un cambio implique romper compatibilidad deberá discutirse antes de ser aceptado.
+Cuando un cambio implique romper compatibilidad, deberá discutirse antes de ser aceptado y documentarse adecuadamente.
 
-Forge utiliza Versionado Semántico (Semantic Versioning).
+Forge utiliza Versionado Semántico (Semantic Versioning) para sus versiones publicadas.
 
 ---
 
 # Documentación
 
-Toda funcionalidad pública deberá estar documentada.
+La documentación forma parte del proyecto y debe mantenerse sincronizada con el comportamiento real de Forge.
 
-Esto incluye:
+Toda API pública deberá contar con documentación apropiada.
+
+Dependiendo del cambio, esto puede incluir:
 
 * JavaDoc;
 * ejemplos de uso;
-* documentación en `docs/` cuando corresponda.
+* documentación en `docs/`;
+* actualización del `README.md`.
 
-La documentación forma parte del código y debe mantenerse sincronizada con él.
+La documentación no debe describir funcionalidades que todavía no existan.
 
 ---
 
 # Pruebas
 
-Toda nueva funcionalidad deberá incluir pruebas apropiadas.
+Toda nueva funcionalidad deberá incluir las pruebas apropiadas.
 
 Dependiendo del cambio podrán requerirse:
 
@@ -145,7 +185,9 @@ Dependiendo del cambio podrán requerirse:
 * pruebas de integración;
 * pruebas de regresión.
 
-No se aceptarán funcionalidades que reduzcan la estabilidad del proyecto.
+Las pruebas deben validar comportamiento observable y contratos relevantes.
+
+No se debe agregar cobertura únicamente para aumentar un porcentaje de cobertura.
 
 ---
 
@@ -156,14 +198,15 @@ Forge utiliza un estilo de código consistente en todos sus módulos.
 Algunas reglas generales:
 
 * nombres descriptivos;
-* clases pequeñas;
-* métodos cortos;
-* evitar duplicación;
+* clases pequeñas cuando sea apropiado;
+* métodos enfocados;
+* evitar duplicación significativa;
 * evitar complejidad innecesaria;
-* preferir composición;
-* minimizar el estado mutable.
+* minimizar el estado mutable;
+* preferir soluciones simples;
+* evitar abstracciones sin una necesidad concreta.
 
-Consulta `CODING_STANDARDS.md` para conocer todas las convenciones.
+Las decisiones de diseño deben priorizar la claridad y el mantenimiento a largo plazo.
 
 ---
 
@@ -172,11 +215,15 @@ Consulta `CODING_STANDARDS.md` para conocer todas las convenciones.
 Antes de agregar una nueva dependencia considera:
 
 * ¿es realmente necesaria?
-* ¿puede resolverse con el JDK?
-* ¿incrementa significativamente el tamaño del proyecto?
-* ¿afecta la mantenibilidad?
+* ¿puede resolverse correctamente con el JDK?
+* ¿puede resolverse con una API estándar de Spring?
+* ¿introduce una dependencia transitiva innecesaria?
+* ¿incrementa significativamente la complejidad o tamaño del proyecto?
+* ¿aporta un beneficio suficiente para justificar su mantenimiento?
 
 Forge intenta mantener un conjunto mínimo de dependencias.
+
+Una dependencia no debe incorporarse únicamente para resolver un problema que puede solucionarse razonablemente con las capacidades existentes de Java o Spring.
 
 ---
 
@@ -184,19 +231,24 @@ Forge intenta mantener un conjunto mínimo de dependencias.
 
 Generalmente un Pull Request será aceptado cuando:
 
-* simplifique la API;
+* aporte un beneficio claro al consumidor;
+* simplifique el uso de Forge;
 * mejore la mantenibilidad;
 * reduzca código repetitivo;
-* mejore el rendimiento sin sacrificar legibilidad;
-* mantenga la filosofía del proyecto.
+* mantenga la consistencia del proyecto;
+* utilice estándares existentes cuando sean adecuados;
+* incluya las pruebas necesarias;
+* mantenga una API pública pequeña.
 
 Un Pull Request probablemente será rechazado cuando:
 
 * aumente innecesariamente la complejidad;
-* introduzca múltiples responsabilidades;
+* introduzca abstracciones especulativas;
 * agregue configuraciones innecesarias;
+* duplique capacidades existentes de Java, HTTP o Spring;
 * rompa la consistencia del proyecto;
-* no aporte un beneficio claro para la mayoría de los usuarios.
+* introduzca una dependencia innecesaria;
+* no aporte un beneficio claro para el consumidor.
 
 ---
 

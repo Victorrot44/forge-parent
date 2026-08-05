@@ -1,9 +1,10 @@
 # Forge Web Architecture
 
-> **Version:** 1.0.0 (Draft)
+> **Version:** 1.0.0
 > **Project:** forge-web
-> **GroupId:** io.github.victorrot44
-> **Artifact:** forge-parent
+> **GroupId:** `io.github.victorrot44`
+> **Java:** 21
+> **Spring Boot:** 4.x
 
 ---
 
@@ -11,264 +12,381 @@
 
 ## 1.1 Propósito
 
-Forge Web es una librería orientada al ecosistema Spring Boot cuyo objetivo es proporcionar un conjunto de componentes reutilizables para construir aplicaciones web con un comportamiento uniforme, desacoplado y fácil de mantener.
+Forge Web es una librería orientada al ecosistema Spring Boot cuyo objetivo es proporcionar componentes reutilizables para estandarizar respuestas HTTP y el manejo global de errores.
 
-Forge busca eliminar la necesidad de que cada proyecto implemente nuevamente aspectos transversales como:
+Forge busca reducir código repetitivo sin imponer una arquitectura de aplicación ni modificar innecesariamente el comportamiento existente.
 
-* Contratos estándar de respuesta.
-* Manejo centralizado de excepciones.
-* Auditoría basada en Request ID.
-* Contexto de ejecución.
-* Logging consistente.
-* Auto configuración mediante Spring Boot.
-* Componentes reutilizables para aplicaciones REST.
+La versión `1.0.0` establece los cimientos del proyecto:
 
-La filosofía de Forge consiste en ofrecer una experiencia **plug & play**, donde un desarrollador pueda integrar la librería en pocos minutos sin perder la capacidad de personalización.
+* modelos de respuesta;
+* modelos de error;
+* excepciones de Forge;
+* validación;
+* manejo global de excepciones para Spring MVC;
+* integración mediante Spring Boot AutoConfiguration;
+* starter para una integración sencilla.
 
----
-
-# 2. Objetivos
-
-Forge tiene como objetivos principales:
-
-* Estandarizar la comunicación entre aplicaciones.
-* Reducir código repetitivo.
-* Mejorar la trazabilidad de las peticiones.
-* Facilitar la observabilidad.
-* Promover buenas prácticas de diseño.
-* Mantener independencia del framework siempre que sea posible.
-* Facilitar la evolución futura del proyecto.
+Las funcionalidades adicionales se incorporarán de forma independiente en versiones posteriores.
 
 ---
 
-# 3. Principios Arquitectónicos
+# 2. Objetivos arquitectónicos
 
-Toda decisión dentro del proyecto deberá respetar los siguientes principios.
+Forge persigue los siguientes objetivos:
 
-## 3.1 SOLID
-
-Todos los componentes deberán cumplir los principios SOLID.
-
-No se aceptarán implementaciones que sacrifiquen mantenibilidad por conveniencia.
-
----
-
-## 3.2 Clean Architecture
-
-La lógica del dominio nunca dependerá de frameworks.
-
-Las dependencias deberán apuntar siempre hacia componentes más abstractos.
+* proporcionar una API pública pequeña;
+* estandarizar respuestas HTTP cuando el consumidor decide utilizarlas;
+* proporcionar un manejo consistente de errores;
+* mantener el Core independiente de Spring;
+* permitir cero configuración para el caso común;
+* evitar efectos secundarios globales inesperados;
+* permitir que el consumidor sustituya comportamientos cuando exista una necesidad legítima;
+* utilizar APIs públicas y estables de Java y Spring;
+* evitar abstracciones especulativas;
+* permitir que nuevas funcionalidades se incorporen de forma independiente.
 
 ---
 
-## 3.3 Framework Agnostic
+# 3. Principios arquitectónicos
 
-El módulo Core no dependerá de:
+## 3.1 Simplicidad
 
-* Spring Framework
-* Spring Boot
-* Jakarta Servlet
-* WebFlux
-* Reactor
-* Librerías HTTP
+La arquitectura debe ser tan pequeña como sea necesario para resolver los problemas actuales.
 
-Toda integración con tecnologías específicas deberá realizarse en módulos dedicados.
+No se crearán módulos, interfaces, factories, providers o capas únicamente para anticipar funcionalidades futuras.
 
 ---
 
-## 3.4 Open for Extension
+## 3.2 Separación de responsabilidades
 
-Forge deberá permitir extender su comportamiento sin modificar su implementación base.
+Cada módulo debe tener una responsabilidad clara.
 
-Siempre que sea posible se preferirá composición sobre herencia.
-
----
-
-## 3.5 Backward Compatibility
-
-Las APIs públicas deberán evolucionar procurando mantener compatibilidad entre versiones menores.
-
-Los cambios incompatibles deberán reservarse para versiones mayores.
+La separación existe para reducir acoplamiento y facilitar el mantenimiento, no como un objetivo independiente.
 
 ---
 
-# 4. Arquitectura Modular
+## 3.3 Independencia del Core
 
-Forge está compuesto por módulos con responsabilidades claramente definidas.
+`forge-web-core` no depende de Spring ni de tecnologías específicas de infraestructura web.
 
-```
+La integración con Spring pertenece a los módulos correspondientes.
+
+---
+
+## 3.4 Uso de estándares
+
+Cuando un estándar de Java, HTTP o Spring resuelva correctamente un problema, Forge debe utilizarlo antes de introducir una abstracción propia.
+
+Esto incluye, entre otros:
+
+* APIs estándar de Java;
+* HTTP;
+* Spring MVC;
+* Spring Boot AutoConfiguration;
+* Problem Details / RFC 9457 cuando corresponda.
+
+---
+
+## 3.5 Extensibilidad controlada
+
+Forge debe permitir personalización cuando exista una necesidad real.
+
+La extensibilidad no debe convertirse en una razón para introducir abstracciones especulativas.
+
+Una funcionalidad puede permanecer concreta mientras no exista una necesidad legítima de sustitución.
+
+---
+
+## 3.6 Compatibilidad
+
+La API pública de Forge debe considerarse un contrato.
+
+Los cambios incompatibles deben evitarse dentro de una misma versión mayor.
+
+La evolución de la API debe realizarse siguiendo Semantic Versioning.
+
+---
+
+# 4. Arquitectura modular
+
+La versión `1.0.0` está compuesta por los siguientes módulos:
+
+```text
 forge-parent
 │
-├── docs
 ├── forge-web-core
 ├── forge-web-autoconfigure
-├── forge-web-starter
-├── forge-web-test
-└── examples
+└── forge-web-starter
 ```
 
-Cada módulo deberá tener una única responsabilidad.
+La documentación del proyecto se encuentra en:
 
-No se permitirá mezclar responsabilidades entre módulos.
+```text
+docs/
+```
 
----
-
-# 5. Responsabilidad de cada módulo
-
-## forge-web-core
-
-Contiene toda la lógica independiente de frameworks.
-
-Responsabilidades:
-
-* Responses
-* Exceptions
-* Error Model
-* Context
-* Factories
-* Validaciones
-* Contratos públicos
-
-No depende de Spring Boot.
-
-No conoce HTTP.
-
-No conoce Servlet.
-
-No conoce Reactor.
-
-Debe poder utilizarse en cualquier aplicación Java.
+La documentación no constituye un módulo Maven.
 
 ---
 
-## forge-web-autoconfigure
+# 5. Dependencias entre módulos
 
-Contiene la configuración automática.
+Las dependencias siguen una dirección unidireccional:
 
-Responsabilidades:
+```text
+forge-web-starter
+        │
+        ▼
+forge-web-autoconfigure
+        │
+        ▼
+forge-web-core
+```
 
-* AutoConfiguration
-* Beans por defecto
-* Properties
-* Conditional Beans
+El Core no depende de los módulos superiores.
 
-No contiene lógica de negocio.
-
----
-
-## forge-web-starter
-
-Integra Forge con Spring Boot.
-
-Responsabilidades:
-
-* Filters
-* Controller Advice
-* Context Provider
-* Logging
-* RequestId
-* Integración HTTP
-
-Todo componente dependiente de Spring deberá vivir en este módulo.
+No deben introducirse dependencias circulares.
 
 ---
 
-## forge-web-test
+# 6. forge-web-core
 
-Componentes reutilizables para pruebas.
+`forge-web-core` constituye el núcleo independiente de Forge.
+
+## Responsabilidades
+
+Contiene:
+
+* respuestas;
+* metadata;
+* detalles de error;
+* tipos de error;
+* excepciones de Forge;
+* validaciones;
+* lógica independiente de Spring.
+
+Ejemplos de componentes:
+
+```text
+io.github.victorrot44.forge.web.core
+│
+├── error
+├── exception
+└── response
+```
+
+El Core utiliza Java 21 y debe permanecer independiente de frameworks.
+
+## Dependencias prohibidas
+
+El Core no debe depender de:
+
+* Spring Framework;
+* Spring Boot;
+* Jakarta Servlet;
+* WebFlux;
+* Reactor;
+* Jackson;
+* implementaciones específicas de servidores HTTP.
+
+---
+
+# 7. forge-web-autoconfigure
+
+`forge-web-autoconfigure` contiene la integración automática de Forge con Spring Boot.
+
+## Responsabilidades
 
 Incluye:
 
-* Test Utilities
-* Assertions
-* Mocks
-* Helpers
+* `@AutoConfiguration`;
+* configuración de propiedades;
+* registro condicional de beans;
+* integración del manejo global de excepciones;
+* componentes específicos de Spring necesarios para el comportamiento de Forge.
+
+La configuración debe utilizar APIs públicas y estables de Spring Boot.
+
+Cuando sea apropiado, la configuración debe permitir que la aplicación sustituya beans proporcionados por Forge.
 
 ---
 
-## examples
+# 8. forge-web-starter
 
-Aplicaciones de ejemplo.
+`forge-web-starter` proporciona una forma sencilla de incorporar Forge a una aplicación Spring Boot.
 
-Su único propósito es demostrar el uso de Forge.
+Su responsabilidad principal es reunir las dependencias necesarias para el consumidor.
+
+El starter no debe convertirse en un contenedor de lógica de negocio ni duplicar la lógica de `forge-web-autoconfigure`.
+
+La implementación concreta de las funcionalidades dependientes de Spring debe permanecer en los módulos correspondientes.
 
 ---
 
-# 6. Reglas de Dependencia
+# 9. Manejo de excepciones
 
-Las dependencias deberán seguir el siguiente flujo.
+Forge proporciona un `@RestControllerAdvice` para manejar errores comunes de aplicaciones Spring MVC.
 
+La implementación actual contempla, entre otras:
+
+| Excepción                                 | HTTP |
+| ----------------------------------------- | ---: |
+| `MethodArgumentNotValidException`         |  400 |
+| `HttpMessageNotReadableException`         |  400 |
+| `MissingServletRequestParameterException` |  400 |
+| `MethodArgumentTypeMismatchException`     |  400 |
+| `MissingRequestHeaderException`           |  400 |
+| `NoResourceFoundException`                |  404 |
+| `HttpRequestMethodNotSupportedException`  |  405 |
+| Excepciones no esperadas                  |  500 |
+
+Las excepciones específicas de Forge se resuelven mediante su `ErrorType` correspondiente.
+
+El consumidor puede proporcionar su propio `@RestControllerAdvice` cuando necesite un comportamiento diferente.
+
+Forge no requiere que el `@RestControllerAdvice` del consumidor extienda una clase de Forge.
+
+---
+
+# 10. Respuestas exitosas
+
+Forge proporciona modelos para respuestas exitosas, pero no obliga a la aplicación a utilizarlos.
+
+El consumidor puede utilizar:
+
+```java
+CreateUserRequest create(@Valid @RequestBody CreateUserRequest request)
 ```
-starter
-      │
-      ▼
-autoconfigure
-      │
-      ▼
-core
+
+o:
+
+```java
+SuccessResponse<CreateUserRequest> create(
+        @Valid @RequestBody CreateUserRequest request)
 ```
 
-Nunca se permitirá una dependencia en sentido contrario.
+o:
+
+```java
+ResponseEntity<SuccessResponse<CreateUserRequest>> create(
+        @Valid @RequestBody CreateUserRequest request)
+```
+
+La librería no debe envolver automáticamente una respuesta existente únicamente para imponer el formato de Forge.
+
+El contrato de la aplicación tiene prioridad cuando el consumidor decide no utilizar `SuccessResponse`.
 
 ---
 
-# 7. Filosofía del Core
+# 11. Respuestas de error
 
-El módulo Core representa el corazón del proyecto.
+Las respuestas de error utilizan `ErrorResponse` y `ErrorDetail`.
 
-Debe permanecer pequeño, estable y completamente independiente.
+Un error puede contener:
 
-Todo componente del Core deberá poder reutilizarse fuera del ecosistema Spring Boot.
+* `code`;
+* `field`;
+* `message`;
+* `details`.
 
----
+Los valores opcionales pueden permanecer ausentes cuando no sean necesarios.
 
-# 8. Convenciones de Diseño
+Forge no obliga al consumidor a definir códigos internos específicos para cada error de validación.
 
-Forge adopta las siguientes convenciones.
-
-* Uso preferente de records para modelos inmutables.
-* Uso de sealed interfaces cuando exista un conjunto cerrado de implementaciones.
-* Builders únicamente cuando el número de parámetros lo justifique.
-* Objetos inmutables siempre que sea posible.
-* Validaciones en constructores compactos.
-* APIs simples para los casos comunes.
-* APIs avanzadas mediante Builders.
+La aplicación puede utilizar códigos propios cuando necesite una identificación más específica.
 
 ---
 
-# 9. Principios de Extensibilidad
+# 12. AutoConfiguration
 
-Forge deberá permitir:
+La integración automática debe seguir las convenciones de Spring Boot.
 
-* reemplazar implementaciones;
-* registrar nuevos componentes;
-* extender respuestas;
-* crear nuevos ErrorDescriptor;
-* implementar nuevos ContextProvider;
-* integrar nuevos mecanismos de logging.
+Forge utiliza:
 
-Sin modificar el código del Core.
+```text
+META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+```
 
----
+para registrar su AutoConfiguration.
 
-# 10. Visión a Futuro
+La configuración debe:
 
-La arquitectura ha sido diseñada para permitir futuras extensiones, entre ellas:
+* activarse automáticamente en el caso común;
+* permitir desactivación cuando exista una propiedad correspondiente;
+* evitar registrar beans innecesarios;
+* respetar beans definidos por el consumidor cuando corresponda.
 
-* soporte para WebFlux;
-* observabilidad con Micrometer;
-* integración con OpenTelemetry;
-* propagación distribuida de RequestId;
-* internacionalización de mensajes;
-* soporte para Problem Details (RFC 9457);
-* integración con clientes HTTP;
-* módulos adicionales para distintos ecosistemas.
-
-Estas funcionalidades deberán implementarse como módulos independientes siempre que sea posible.
+Forge no debe modificar propiedades globales de la aplicación sin una configuración explícita.
 
 ---
 
-# 11. Objetivo Final
+# 13. API pública
 
-Forge aspira a convertirse en una librería de referencia para aplicaciones Spring Boot que permita construir servicios consistentes, observables y mantenibles mediante una arquitectura modular, extensible y desacoplada.
- 
+Todo elemento `public` expuesto por Forge debe considerarse parte potencial del contrato público.
+
+Antes de hacer público un tipo debe existir una razón concreta.
+
+Preferir visibilidad restringida para componentes internos.
+
+No deben exponerse clases internas, helpers o implementaciones únicamente porque sean utilizadas por otros componentes del mismo módulo.
+
+---
+
+# 14. Evolución modular
+
+Las funcionalidades futuras deberán incorporarse de forma independiente siempre que sea razonablemente posible.
+
+Por ejemplo:
+
+```text
+v1.0
+│
+├── Responses
+├── Errors
+├── Exception Handling
+└── Spring Boot Integration
+
+future
+│
+├── Request ID
+├── HTTP Logging
+├── Observability
+└── ...
+```
+
+La existencia de una posible funcionalidad futura no justifica introducir anticipadamente sus abstracciones.
+
+Cada nueva funcionalidad deberá integrarse cuando exista una necesidad concreta y observable.
+
+---
+
+# 15. Límites de la arquitectura
+
+Forge no pretende:
+
+* reemplazar Spring Boot;
+* implementar lógica de negocio;
+* imponer una arquitectura de aplicación;
+* abstraer todas las APIs de Spring;
+* proporcionar una solución para todos los problemas web;
+* anticipar funcionalidades futuras mediante capas o abstracciones innecesarias.
+
+Forge proporciona una base técnica pequeña y reutilizable.
+
+---
+
+# 16. Regla arquitectónica principal
+
+La arquitectura de Forge debe evolucionar desde las necesidades reales del producto.
+
+Antes de crear un nuevo módulo, interfaz, abstracción o patrón debe responderse:
+
+1. ¿Qué problema concreto resuelve?
+2. ¿Quién consume esta funcionalidad?
+3. ¿Existe una API estándar que ya lo resuelva?
+4. ¿Puede implementarse de forma más sencilla?
+5. ¿Necesita realmente ser extensible?
+6. ¿Debe formar parte de la API pública?
+7. ¿Puede incorporarse sin afectar funcionalidades existentes?
+
+Si una abstracción no aporta un beneficio observable al consumidor, no debe introducirse.

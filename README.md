@@ -1,42 +1,43 @@
 # Forge Web
 
-> **A lightweight Spring Boot starter for consistent APIs, centralized exception handling, request tracing, and web infrastructure.**
+> **A lightweight Spring Boot starter for standardized HTTP responses and centralized exception handling.**
 
-Forge Web proporciona una base sólida para aplicaciones Spring Boot mediante respuestas estandarizadas, manejo centralizado de excepciones, trazabilidad con Request ID y una integración transparente con el ecosistema de Spring.
+Forge Web proporciona una base ligera para aplicaciones Spring Boot mediante respuestas HTTP estandarizadas, manejo centralizado de excepciones e integración transparente con Spring Boot.
+
+El objetivo de Forge es reducir código repetitivo sin imponer una arquitectura de aplicación ni modificar innecesariamente el comportamiento existente.
 
 ---
 
 ## ¿Por qué existe Forge?
 
-En la mayoría de aplicaciones Spring Boot se repiten los mismos componentes:
+En las aplicaciones Spring Boot se repiten con frecuencia componentes como:
 
-* wrappers para respuestas HTTP;
-* `@ControllerAdvice`;
-* excepciones personalizadas;
-* filtros para Request ID;
-* logging;
-* auditoría;
-* validaciones;
-* configuración repetitiva.
+* formatos de respuesta HTTP;
+* `@RestControllerAdvice`;
+* manejo de excepciones;
+* validación de requests;
+* códigos y mensajes de error;
+* configuración repetitiva entre servicios.
 
-Cada equipo termina implementando estas piezas una y otra vez.
+Forge proporciona estas capacidades de forma reutilizable y consistente.
 
-Forge nace para resolver ese problema una sola vez mediante una solución consistente, extensible y fácil de integrar.
+La librería está diseñada para integrarse progresivamente en aplicaciones existentes y mantener una API pública pequeña.
 
 ---
 
-# Características
+# Características actuales
 
 * Respuestas HTTP estandarizadas.
 * Manejo centralizado de excepciones.
-* Catálogo de errores reutilizable.
-* Request ID para trazabilidad.
-* Contexto compartido durante la petición.
-* Integración automática con Spring Boot.
-* Configuración mediante AutoConfiguration.
-* API pequeña y fácil de aprender.
-* Arquitectura modular.
-* Extensible mediante contratos e interfaces.
+* Respuestas de error basadas en Problem Details / RFC 9457 como referencia conceptual.
+* Catálogo de tipos de error reutilizable.
+* Manejo de excepciones comunes de Spring MVC.
+* AutoConfiguration para Spring Boot.
+* Starter para integración sencilla.
+* Core independiente de Spring.
+* Cero configuración para el caso común.
+* Respuestas exitosas opcionales mediante `SuccessResponse`.
+* No modifica automáticamente las respuestas exitosas de la aplicación.
 
 ---
 
@@ -47,10 +48,12 @@ Forge sigue algunos principios fundamentales:
 * Simplicidad antes que complejidad.
 * Convención antes que configuración.
 * El Core no depende de Spring.
-* Objetos públicos inmutables.
-* APIs pequeñas y expresivas.
-* Componentes fácilmente extensibles.
-* Consistencia entre aplicaciones.
+* Las APIs públicas deben ser pequeñas y estables.
+* No introducir abstracciones sin una necesidad concreta.
+* Utilizar estándares de Java, HTTP y Spring cuando resuelvan correctamente el problema.
+* No modificar el comportamiento de la aplicación de forma inesperada.
+* Las funcionalidades deben poder incorporarse de forma independiente.
+* La extensibilidad debe responder a necesidades reales del consumidor.
 
 Más información en `docs/PHILOSOPHY.md`.
 
@@ -61,115 +64,159 @@ Más información en `docs/PHILOSOPHY.md`.
 ```text
                 +---------------------------+
                 | forge-web-starter         |
-                | Filters                   |
-                | ControllerAdvice          |
-                | Jackson                   |
+                |                           |
+                | Spring Boot Starter       |
                 +-------------+-------------+
                               |
                 +-------------v-------------+
                 | forge-web-autoconfigure   |
+                |                           |
                 | AutoConfiguration         |
-                | Properties                |
+                | Exception Handling        |
+                | Spring Integration        |
                 +-------------+-------------+
                               |
                 +-------------v-------------+
                 | forge-web-core            |
-                | Response                  |
+                |                           |
+                | Responses                 |
                 | Errors                    |
-                | Context                   |
                 | Exceptions                |
-                | Factory                   |
+                | Validation                |
                 +---------------------------+
 ```
+
+El módulo `forge-web-core` no depende de Spring.
+
+La integración específica con Spring Boot se encuentra en los módulos correspondientes.
 
 ---
 
 # Módulos
 
-| Módulo                    | Descripción                                                        |
-| ------------------------- | ------------------------------------------------------------------ |
-| `forge-web-core`          | Modelos, contratos y lógica independiente del framework.           |
-| `forge-web-autoconfigure` | Configuración automática para Spring Boot.                         |
-| `forge-web-starter`       | Integración HTTP, filtros, manejo global de excepciones y logging. |
-| `forge-web-test`          | Utilidades para pruebas.                                           |
-| `examples`                | Ejemplos de uso.                                                   |
+| Módulo                    | Descripción                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `forge-web-core`          | Modelos, respuestas, errores, excepciones y lógica independiente de Spring.    |
+| `forge-web-autoconfigure` | AutoConfiguration e integración con Spring Boot.                               |
+| `forge-web-starter`       | Starter que simplifica la incorporación de Forge a una aplicación Spring Boot. |
 
 ---
 
 # Instalación
 
-Agregar la dependencia:
+Agregar el starter:
 
 ```xml
 <dependency>
     <groupId>io.github.victorrot44</groupId>
     <artifactId>forge-web-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
+Forge está diseñado para funcionar con cero configuración en el caso común.
+
 ---
 
-# Primer ejemplo
+# Respuestas exitosas
+
+Forge no obliga a envolver automáticamente las respuestas exitosas de una aplicación.
+
+Por ejemplo, un endpoint puede continuar utilizando una respuesta normal de Spring:
 
 ```java
-@RestController
-@RequestMapping("/users")
-public class UserController {
-
-    private final ResponseFactory responses;
-
-    public UserController(ResponseFactory responses) {
-        this.responses = responses;
-    }
-
-    @GetMapping("/{id}")
-    public SuccessResponse<UserDto> getUser(@PathVariable Long id) {
-        UserDto user = service.findById(id);
-        return responses.ok(user);
-    }
+@PostMapping("/users")
+CreateUserRequest create(@Valid @RequestBody CreateUserRequest request) {
+    // ...
 }
 ```
 
-Respuesta:
+También puede utilizar directamente el modelo de respuesta de Forge:
 
-```json
-{
-  "requestId": "0b2fd6f6-d6d9-43f5-a642-624d4c4ec7f4",
-  "timestamp": "2026-07-29T18:30:15Z",
-  "httpStatus": 200,
-  "code": "SUCCESS",
-  "message": "Operation completed successfully.",
-  "data": {
-    "id": 1,
-    "name": "Victor"
-  }
+```java
+@PostMapping("/users")
+SuccessResponse<CreateUserRequest> create(
+        @Valid @RequestBody CreateUserRequest request) {
+
+    // ...
 }
 ```
+
+Y cuando se necesita controlar explícitamente el `ResponseEntity`:
+
+```java
+@PostMapping("/users")
+ResponseEntity<SuccessResponse<CreateUserRequest>> create(
+        @Valid @RequestBody CreateUserRequest request) {
+
+    // ...
+}
+```
+
+Forge respeta el contrato elegido por la aplicación.
 
 ---
 
 # Manejo de excepciones
 
+Forge registra automáticamente un manejador global de excepciones para las aplicaciones Spring Boot que utilizan el starter.
+
+Por ejemplo:
+
 ```java
-throw new ValidationException(UserErrors.INVALID_EMAIL);
+throw new ForgeException(
+        ErrorCategory.BUSINESS,
+        ErrorType.RESOURCE_NOT_FOUND,
+        "Información solicitada no encontrada."
+);
 ```
 
-Forge convertirá automáticamente la excepción en una respuesta uniforme.
+Puede producir una respuesta como:
+
+```json
+{
+  "requestId": null,
+  "timestamp": "2026-08-04T16:28:53Z",
+  "httpStatus": 404,
+  "code": "RESOURCE_NOT_FOUND",
+  "message": "Información solicitada no encontrada.",
+  "errors": [],
+  "metadata": null
+}
+```
+
+Las excepciones comunes de Spring MVC también son manejadas cuando corresponda.
+
+Por ejemplo:
+
+* `MethodArgumentNotValidException` → `400`
+* `HttpMessageNotReadableException` → `400`
+* `MissingServletRequestParameterException` → `400`
+* `MethodArgumentTypeMismatchException` → `400`
+* `MissingRequestHeaderException` → `400`
+* `NoResourceFoundException` → `404`
+* `HttpRequestMethodNotSupportedException` → `405`
+* excepciones no esperadas → `500`
+
+La aplicación puede proporcionar su propio `@RestControllerAdvice` cuando necesite un comportamiento diferente.
 
 ---
 
 # Configuración
 
-La mayoría de aplicaciones no requieren configuración adicional.
+La mayoría de las aplicaciones no requieren configuración adicional.
 
-Cuando sea necesario, Forge podrá personalizarse mediante propiedades de Spring Boot.
+Forge está diseñado para proporcionar un comportamiento útil mediante convenciones y valores predeterminados razonables.
+
+Las propiedades de configuración solamente se introducirán cuando exista una necesidad concreta de personalización.
 
 ---
 
 # Documentación
 
-La documentación completa se encuentra en la carpeta `docs/`.
+La documentación se encuentra en la carpeta `docs/`.
+
+Documentos principales:
 
 * `ARCHITECTURE.md`
 * `MODULES.md`
@@ -183,11 +230,21 @@ La documentación completa se encuentra en la carpeta `docs/`.
 
 Versión actual:
 
-```
+```text
 1.0.0-SNAPSHOT
 ```
 
-El proyecto se encuentra en desarrollo activo.
+Esta versión establece los cimientos de Forge:
+
+* modelo de respuestas;
+* modelo de errores;
+* excepciones;
+* manejo global de excepciones;
+* integración con Spring Boot;
+* starter;
+* testing de la funcionalidad base.
+
+Las funcionalidades adicionales se incorporarán de forma independiente en versiones posteriores.
 
 ---
 
@@ -195,7 +252,7 @@ El proyecto se encuentra en desarrollo activo.
 
 | Forge | Spring Boot | Java |
 | ----- | ----------- | ---- |
-| 1.x   | 3.x         | 21+  |
+| 1.x   | 4.x         | 21+  |
 
 ---
 
