@@ -28,21 +28,8 @@ public class SuccessResponseTest {
     }
 
     @Test
-    void shouldBuildResponseWithRequestId() {
-        SuccessResponse<String> response = SuccessResponse.<String>builder()
-                .requestId("request-123")
-                .httpStatus(200)
-                .code("USER_FOUND")
-                .message("Usuario encontrado.")
-                .data("Victor")
-                .build();
-        assertThat(response.requestId()).isEqualTo("request-123");
-    }
-
-    @Test
     void shouldBuildResponseWithNullData() {
         SuccessResponse<String> response = SuccessResponse.<String>builder()
-                .requestId("request-123")
                 .httpStatus(200)
                 .code("USER_FOUND")
                 .message("Usuario encontrado.")

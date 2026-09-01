@@ -20,19 +20,7 @@ public class ErrorResponseTest {
         assertThat(error.message()).isEqualTo("Usuario no encontrado.");
         assertThat(error.errors()).isEmpty();
         assertThat(error.metadata()).isNull();
-        assertThat(error.requestId()).isNull();
         assertThat(error.timestamp()).isNotNull();
-    }
-
-    @Test
-    void shouldBuildErrorWithRequestId() {
-        var error = ErrorResponse.builder()
-                .httpStatus(404)
-                .code("USER_NOT_FOUND")
-                .message("Usuario no encontrado.")
-                .requestId("request-123")
-                .build();
-        assertThat(error.requestId()).isEqualTo("request-123");
     }
 
     @Test

@@ -6,7 +6,6 @@ import io.github.victorrot44.forge.web.core.response.validator.ResponseValidator
 import java.time.Instant;
 
 public record SuccessResponse<T>(
-        String requestId,
         Instant timestamp,
         int httpStatus,
         String code,
@@ -37,7 +36,7 @@ public record SuccessResponse<T>(
 
         public SuccessResponse<T> build() {
             validate();
-            return new SuccessResponse<>(requestId, timestamp, httpStatus, code, message, data, buildMetadata(pagination));
+            return new SuccessResponse<>(timestamp, httpStatus, code, message, data, buildMetadata(pagination));
         }
 
     }
