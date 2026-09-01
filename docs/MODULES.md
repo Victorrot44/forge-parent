@@ -1,7 +1,7 @@
 # Modules Guide
 
 > **Proyecto:** Forge Web
-> **Versión:** 1.0.0
+> **Versión:** 1.0.x
 
 Este documento define la responsabilidad de cada módulo de Forge y las reglas para determinar dónde debe incorporarse una nueva funcionalidad.
 
@@ -21,7 +21,7 @@ La existencia de un módulo no justifica por sí misma la creación de nuevas ab
 
 # Estructura actual
 
-La versión `1.0.0` está compuesta por:
+Forge Web está compuesto por:
 
 ```text
 forge-parent
@@ -34,9 +34,7 @@ forge-parent
 
 `docs/` contiene documentación del proyecto y no constituye un módulo Maven.
 
-No forman parte de la estructura actual de la versión `1.0.0` módulos como `forge-web-test` o `examples`.
-
-Podrán incorporarse posteriormente cuando exista una necesidad concreta que justifique su creación.
+La estructura actual se mantiene deliberadamente pequeña y no incluye módulos adicionales.
 
 ---
 
@@ -44,7 +42,7 @@ Podrán incorporarse posteriormente cuando exista una necesidad concreta que jus
 
 ## Responsabilidad
 
-`forge-web-core` contiene los modelos, contratos y lógica que no requieren Spring ni infraestructura web.
+`forge-web-core` contiene los modelos, contratos y lógica que forman parte del núcleo funcional de Forge y que no requieren Spring ni infraestructura web.
 
 Es el núcleo independiente de Forge.
 
@@ -118,7 +116,8 @@ Su función es registrar y configurar los componentes necesarios para que Forge 
 * condiciones de configuración;
 * configuración opcional;
 * registro de AutoConfiguration;
-* componentes específicos de Spring necesarios para la integración.
+* componentes específicos de Spring necesarios para la integración;
+* integración opcional con Jackson.
 
 ---
 
@@ -183,20 +182,13 @@ El Starter es principalmente el mecanismo de conveniencia para incorporar Forge.
 
 ---
 
-# Módulos futuros
+# Nuevos módulos
 
 Forge puede incorporar nuevos módulos cuando una funcionalidad concreta lo justifique.
 
-Por ejemplo:
+Sin embargo, un módulo no debe crearse anticipadamente para funcionalidades que todavía no existen o que pertenecen a otra responsabilidad.
 
-```text
-forge-web-test
-forge-web-...
-```
-
-Sin embargo, un módulo futuro no debe crearse anticipadamente.
-
-Antes de crear uno nuevo debe existir una responsabilidad suficientemente independiente que justifique su separación.
+Antes de crear un nuevo módulo debe existir una responsabilidad suficientemente independiente que justifique su separación.
 
 ---
 
@@ -301,7 +293,7 @@ Si sí, evaluar `forge-web-core`.
 
 ### 2. ¿Requiere Spring Boot para funcionar?
 
-Si sí, evaluar `forge-web-autoconfigure` o un futuro módulo específico de integración.
+Si sí, evaluar `forge-web-autoconfigure` o un módulo de integración específico si realmente existe una responsabilidad independiente que lo justifique.
 
 ### 3. ¿Es únicamente composición de dependencias?
 
@@ -323,4 +315,4 @@ Mantener una arquitectura pequeña, predecible y fácil de evolucionar.
 
 Cada módulo debe existir porque resuelve una responsabilidad concreta, no porque una arquitectura idealizada requiera más capas.
 
-La estructura de Forge debe crecer junto con sus funcionalidades reales.
+La estructura de Forge debe crecer únicamente junto con funcionalidades reales y necesidades justificadas.

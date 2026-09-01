@@ -1,8 +1,8 @@
 # Design Decisions
 
 > **Proyecto:** Forge Web
-> **Versión:** 1.0.0
-> **Estado:** Activo
+> **Versión:** 1.0.x
+> **Estado:** Estable
 
 Este documento registra las principales decisiones de diseño tomadas durante el desarrollo de Forge.
 
@@ -22,7 +22,7 @@ Aceptado.
 
 Forge se divide en módulos con responsabilidades independientes:
 
-```text id="c7m3p8"
+```text
 forge-parent
 │
 ├── forge-web-core
@@ -103,21 +103,23 @@ Forge no envolverá automáticamente las respuestas de los controladores para im
 
 Una aplicación puede utilizar:
 
-```java id="i0f2sy"
+```java
 @PostMapping("/users")
 CreateUserResponse create(@RequestBody CreateUserRequest request)
 ```
 
 o utilizar explícitamente:
 
-```java id="j7t9r4"
+```java
 @PostMapping("/users")
-SuccessResponse<CreateUserResponse> create(@RequestBody CreateUserRequest request)
+SuccessResponse<CreateUserResponse> create(
+        @RequestBody CreateUserRequest request)
 ```
 
 También puede utilizar:
 
-```java id="j6p8tq"
+```java
+@PostMapping("/users")
 ResponseEntity<SuccessResponse<CreateUserResponse>> create(
         @RequestBody CreateUserRequest request)
 ```
@@ -196,7 +198,7 @@ Forge proporciona excepciones propias para errores que forman parte de su contra
 
 La jerarquía actual incluye:
 
-```text id="x8c0tm"
+```text
 ForgeException
 ForgeInternalException
 ```
@@ -225,7 +227,7 @@ Forge utiliza `ErrorType` para representar categorías generales de error.
 
 La versión actual incluye:
 
-```text id="p9m6c1"
+```text
 INVALID_ARGUMENT
 RESOURCE_NOT_FOUND
 CONFLICT
@@ -413,6 +415,100 @@ Una funcionalidad futura no debe modificar anticipadamente la arquitectura de fu
 Permite mantener la versión base pequeña y estable.
 
 La arquitectura debe evolucionar a partir de necesidades reales y no a partir de funcionalidades hipotéticas.
+
+---
+
+# ADR-016: Request ID fuera del alcance de Forge Web
+
+## Estado
+
+Aceptado.
+
+## Decisión
+
+Forge Web no proporciona mecanismos propios para generar, validar, propagar o almacenar un Request ID.
+
+`Request ID`, correlation ID y trazabilidad distribuida quedan fuera del alcance de Forge Web.
+
+Forge no incorporará:
+
+* generación automática de Request ID;
+* propagación de Request ID mediante headers;
+* validación de identificadores de solicitud;
+* integración con MDC;
+* almacenamiento de identificadores de solicitud;
+* contexto global de ejecución;
+* persistencia de información de trazabilidad.
+
+Cuando una aplicación necesite estas capacidades, deberá utilizar las herramientas de observabilidad, tracing o correlación que correspondan a su arquitectura.
+
+## Justificación
+
+Forge tiene como responsabilidad principal la estandarización de respuestas HTTP y el manejo global de errores.
+
+La generación y propagación de identificadores de solicitud pertenece al ámbito de observabilidad y trazabilidad, no al contrato de las respuestas HTTP.
+
+Existen estándares y soluciones especializadas para resolver estas necesidades. Implementar una solución propia dentro de Forge introduciría responsabilidades adicionales, configuración y superficie de API sin aportar un beneficio directo al propósito principal de la librería.
+
+Mantener esta responsabilidad fuera de Forge permite:
+
+* conservar el Core pequeño;
+* evitar acoplamiento con mecanismos de observabilidad;
+* evitar duplicar capacidades proporcionadas por otras herramientas;
+* mantener una API pública mínima;
+* permitir que cada aplicación adopte la estrategia de trazabilidad adecuada.
+
+Por esta razón, `requestId` no forma parte de `ErrorResponse`.
+
+---
+
+# ADR-017: Serialización opcional de respuestas
+
+## Estado
+
+Aceptado.
+
+## Decisión
+
+Forge mantiene sus modelos del Core independientes de Jackson.
+
+La integración con Jackson se realiza de forma opcional desde el módulo de integración con Spring Boot.
+
+Cuando Jackson está disponible, Forge puede aplicar reglas de serialización específicas mediante mecanismos de integración como Jackson Mixins.
+
+Las respuestas no deben incluir propiedades `null` o valores vacíos cuando no aporten información al consumidor.
+
+Las respuestas exitosas mantienen `data` en el contrato incluso cuando su valor sea `null`.
+
+## Justificación
+
+La representación JSON pertenece a la capa de integración y no debe introducir una dependencia de Jackson en el Core.
+
+La eliminación de valores innecesarios permite producir respuestas más limpias sin modificar los modelos fundamentales de Forge.
+
+Mantener esta integración opcional evita imponer una tecnología de serialización al consumidor.
+
+---
+
+# ADR-018: Diseño de errores basado en Problem Details
+
+## Estado
+
+Aceptado.
+
+## Decisión
+
+El diseño de las respuestas de error de Forge toma como referencia **RFC 9457 — Problem Details for HTTP APIs**.
+
+Forge utiliza su propio modelo `ErrorResponse` para mantener el contrato definido por la librería, pero sus decisiones de diseño deben mantenerse alineadas con los principios de Problem Details cuando sean aplicables.
+
+## Justificación
+
+RFC 9457 proporciona un estándar de la industria para representar información de errores HTTP.
+
+Forge debe aprovechar estándares existentes en lugar de crear convenciones arbitrarias.
+
+La adopción del estándar no implica introducir una dependencia adicional ni convertir el Core en una implementación específica de un framework.
 
 ---
 

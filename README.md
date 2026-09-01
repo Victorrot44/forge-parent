@@ -27,16 +27,18 @@ La librería está diseñada para integrarse progresivamente en aplicaciones exi
 
 # Características actuales
 
-* Respuestas HTTP estandarizadas.
+* Respuestas HTTP estandarizadas mediante `SuccessResponse` y `ErrorResponse`.
 * Manejo centralizado de excepciones.
-* Respuestas de error basadas en Problem Details / RFC 9457 como referencia conceptual.
+* Respuestas de error inspiradas en el estándar Problem Details / RFC 9457.
 * Catálogo de tipos de error reutilizable.
 * Manejo de excepciones comunes de Spring MVC.
 * AutoConfiguration para Spring Boot.
 * Starter para integración sencilla.
 * Core independiente de Spring.
 * Cero configuración para el caso común.
-* Respuestas exitosas opcionales mediante `SuccessResponse`.
+* Soporte opcional para respuestas exitosas mediante `SuccessResponse`.
+* Serialización configurable de respuestas mediante Jackson cuando está disponible.
+* Exclusión de propiedades vacías o nulas en las respuestas cuando la integración Jackson está habilitada.
 * No modifica automáticamente las respuestas exitosas de la aplicación.
 
 ---
@@ -73,6 +75,7 @@ Más información en `docs/PHILOSOPHY.md`.
                 |                           |
                 | AutoConfiguration         |
                 | Exception Handling        |
+                | Jackson Integration       |
                 | Spring Integration        |
                 +-------------+-------------+
                               |
@@ -86,19 +89,19 @@ Más información en `docs/PHILOSOPHY.md`.
                 +---------------------------+
 ```
 
-El módulo `forge-web-core` no depende de Spring.
+El módulo `forge-web-core` no depende de Spring ni de Jackson.
 
-La integración específica con Spring Boot se encuentra en los módulos correspondientes.
+La integración específica con Spring Boot y Jackson se encuentra en los módulos correspondientes.
 
 ---
 
 # Módulos
 
-| Módulo                    | Descripción                                                                    |
-| ------------------------- | ------------------------------------------------------------------------------ |
-| `forge-web-core`          | Modelos, respuestas, errores, excepciones y lógica independiente de Spring.    |
-| `forge-web-autoconfigure` | AutoConfiguration e integración con Spring Boot.                               |
-| `forge-web-starter`       | Starter que simplifica la incorporación de Forge a una aplicación Spring Boot. |
+| Módulo                    | Descripción                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| `forge-web-core`          | Modelos, respuestas, errores, excepciones, validaciones y lógica independiente de Spring.  |
+| `forge-web-autoconfigure` | AutoConfiguration, manejo de excepciones e integración opcional con Spring Boot y Jackson. |
+| `forge-web-starter`       | Starter que simplifica la incorporación de Forge a una aplicación Spring Boot.             |
 
 ---
 
@@ -110,7 +113,7 @@ Agregar el starter:
 <dependency>
     <groupId>io.github.victorrot44</groupId>
     <artifactId>forge-web-starter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -126,7 +129,7 @@ Por ejemplo, un endpoint puede continuar utilizando una respuesta normal de Spri
 
 ```java
 @PostMapping("/users")
-CreateUserRequest create(@Valid @RequestBody CreateUserRequest request) {
+CreateUserResponse create(@Valid @RequestBody CreateUserRequest request) {
     // ...
 }
 ```
@@ -135,7 +138,7 @@ También puede utilizar directamente el modelo de respuesta de Forge:
 
 ```java
 @PostMapping("/users")
-SuccessResponse<CreateUserRequest> create(
+SuccessResponse<CreateUserResponse> create(
         @Valid @RequestBody CreateUserRequest request) {
 
     // ...
@@ -146,7 +149,7 @@ Y cuando se necesita controlar explícitamente el `ResponseEntity`:
 
 ```java
 @PostMapping("/users")
-ResponseEntity<SuccessResponse<CreateUserRequest>> create(
+ResponseEntity<SuccessResponse<CreateUserResponse>> create(
         @Valid @RequestBody CreateUserRequest request) {
 
     // ...
@@ -154,6 +157,8 @@ ResponseEntity<SuccessResponse<CreateUserRequest>> create(
 ```
 
 Forge respeta el contrato elegido por la aplicación.
+
+Cuando se utiliza `SuccessResponse`, Forge proporciona la estructura estandarizada correspondiente.
 
 ---
 
@@ -165,7 +170,6 @@ Por ejemplo:
 
 ```java
 throw new ForgeException(
-        ErrorCategory.BUSINESS,
         ErrorType.RESOURCE_NOT_FOUND,
         "Información solicitada no encontrada."
 );
@@ -175,17 +179,17 @@ Puede producir una respuesta como:
 
 ```json
 {
-  "requestId": null,
-  "timestamp": "2026-08-04T16:28:53Z",
+  "timestamp": "2026-09-01T16:39:29Z",
   "httpStatus": 404,
   "code": "RESOURCE_NOT_FOUND",
   "message": "Información solicitada no encontrada.",
-  "errors": [],
-  "metadata": null
+  "errors": []
 }
 ```
 
-Las excepciones comunes de Spring MVC también son manejadas cuando corresponda.
+Los campos opcionales pueden omitirse durante la serialización cuando la integración correspondiente está habilitada.
+
+Las excepciones comunes de Spring MVC también son manejadas cuando corresponde.
 
 Por ejemplo:
 
@@ -198,7 +202,53 @@ Por ejemplo:
 * `HttpRequestMethodNotSupportedException` → `405`
 * excepciones no esperadas → `500`
 
+Las excepciones específicas de Forge utilizan `ErrorType` para determinar su representación HTTP.
+
 La aplicación puede proporcionar su propio `@RestControllerAdvice` cuando necesite un comportamiento diferente.
+
+---
+
+# Respuestas de error
+
+Forge utiliza `ErrorResponse` para representar errores HTTP de forma consistente.
+
+Una respuesta puede contener:
+
+* `timestamp`;
+* `httpStatus`;
+* `code`;
+* `message`;
+* `errors`;
+* `metadata`.
+
+Los campos opcionales pueden permanecer ausentes cuando no sean necesarios.
+
+Por ejemplo, un error de recurso no encontrado puede representarse como:
+
+```json
+{
+  "timestamp": "2026-09-01T16:39:29Z",
+  "httpStatus": 404,
+  "code": "RESOURCE_NOT_FOUND",
+  "message": "Información solicitada no encontrada."
+}
+```
+
+La estructura de errores de Forge toma como referencia los principios de Problem Details para HTTP APIs definidos por RFC 9457, pero mantiene su propio contrato de respuesta.
+
+---
+
+# Jackson
+
+La integración con Jackson es opcional.
+
+Forge no incorpora Jackson como dependencia del Core.
+
+Cuando la integración Jackson está disponible, Forge puede utilizar sus mecanismos de serialización para evitar la inclusión de propiedades vacías o nulas en las respuestas.
+
+Esto permite mantener el Core independiente del mecanismo concreto de serialización.
+
+La aplicación mantiene el control sobre la configuración de Jackson y Forge no debe imponer configuraciones globales innecesarias.
 
 ---
 
@@ -208,7 +258,9 @@ La mayoría de las aplicaciones no requieren configuración adicional.
 
 Forge está diseñado para proporcionar un comportamiento útil mediante convenciones y valores predeterminados razonables.
 
-Las propiedades de configuración solamente se introducirán cuando exista una necesidad concreta de personalización.
+Las propiedades de configuración solamente se introducen cuando existe una necesidad concreta de personalización.
+
+La configuración de Forge debe permanecer opcional y no invasiva.
 
 ---
 
@@ -223,6 +275,8 @@ Documentos principales:
 * `PHILOSOPHY.md`
 * `DESIGN_DECISIONS.md`
 * `ROADMAP.md`
+* `CODING_STANDARDS.md`
+* `CONTRIBUTING.md`
 
 ---
 
@@ -231,20 +285,24 @@ Documentos principales:
 Versión actual:
 
 ```text
-1.0.0-SNAPSHOT
+1.0.0
 ```
 
-Esta versión establece los cimientos de Forge:
+La versión `1.0.0` establece una base estable para Forge:
 
-* modelo de respuestas;
-* modelo de errores;
+* modelos de respuestas;
+* modelos de error;
 * excepciones;
+* validaciones;
 * manejo global de excepciones;
 * integración con Spring Boot;
+* soporte opcional de Jackson;
 * starter;
-* testing de la funcionalidad base.
+* pruebas de la funcionalidad base.
 
-Las funcionalidades adicionales se incorporarán de forma independiente en versiones posteriores.
+Forge no incorpora funcionalidades de observabilidad, tracing, Request ID, correlation ID o logging HTTP como parte de su contrato base.
+
+Las funcionalidades futuras deberán evaluarse de forma independiente y solamente incorporarse cuando exista una necesidad concreta que justifique su inclusión.
 
 ---
 

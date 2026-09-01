@@ -1,6 +1,6 @@
 # Forge Web Architecture
 
-> **Version:** 1.0.0
+> **Version:** 1.0.x
 > **Project:** forge-web
 > **GroupId:** `io.github.victorrot44`
 > **Java:** 21
@@ -16,7 +16,7 @@ Forge Web es una librería orientada al ecosistema Spring Boot cuyo objetivo es 
 
 Forge busca reducir código repetitivo sin imponer una arquitectura de aplicación ni modificar innecesariamente el comportamiento existente.
 
-La versión `1.0.0` establece los cimientos del proyecto:
+La versión `1.0.x` establece una base estable compuesta por:
 
 * modelos de respuesta;
 * modelos de error;
@@ -24,9 +24,10 @@ La versión `1.0.0` establece los cimientos del proyecto:
 * validación;
 * manejo global de excepciones para Spring MVC;
 * integración mediante Spring Boot AutoConfiguration;
+* integración opcional con Jackson;
 * starter para una integración sencilla.
 
-Las funcionalidades adicionales se incorporarán de forma independiente en versiones posteriores.
+Forge no pretende convertirse en una solución general de observabilidad, trazabilidad o logging.
 
 ---
 
@@ -35,15 +36,16 @@ Las funcionalidades adicionales se incorporarán de forma independiente en versi
 Forge persigue los siguientes objetivos:
 
 * proporcionar una API pública pequeña;
-* estandarizar respuestas HTTP cuando el consumidor decide utilizarlas;
+* proporcionar contratos estandarizados de respuesta cuando el consumidor decide utilizarlos;
 * proporcionar un manejo consistente de errores;
 * mantener el Core independiente de Spring;
 * permitir cero configuración para el caso común;
 * evitar efectos secundarios globales inesperados;
 * permitir que el consumidor sustituya comportamientos cuando exista una necesidad legítima;
 * utilizar APIs públicas y estables de Java y Spring;
+* utilizar estándares existentes cuando resuelvan correctamente un problema;
 * evitar abstracciones especulativas;
-* permitir que nuevas funcionalidades se incorporen de forma independiente.
+* mantener cada funcionalidad dentro de una responsabilidad claramente definida.
 
 ---
 
@@ -109,7 +111,7 @@ La evolución de la API debe realizarse siguiendo Semantic Versioning.
 
 # 4. Arquitectura modular
 
-La versión `1.0.0` está compuesta por los siguientes módulos:
+Forge está compuesto por los siguientes módulos:
 
 ```text
 forge-parent
@@ -126,6 +128,8 @@ docs/
 ```
 
 La documentación no constituye un módulo Maven.
+
+La estructura se mantiene deliberadamente pequeña y no incluye módulos adicionales.
 
 ---
 
@@ -163,6 +167,7 @@ Contiene:
 * tipos de error;
 * excepciones de Forge;
 * validaciones;
+* builders;
 * lógica independiente de Spring.
 
 Ejemplos de componentes:
@@ -203,6 +208,7 @@ Incluye:
 * configuración de propiedades;
 * registro condicional de beans;
 * integración del manejo global de excepciones;
+* integración opcional con Jackson;
 * componentes específicos de Spring necesarios para el comportamiento de Forge.
 
 La configuración debe utilizar APIs públicas y estables de Spring Boot.
@@ -217,7 +223,7 @@ Cuando sea apropiado, la configuración debe permitir que la aplicación sustitu
 
 Su responsabilidad principal es reunir las dependencias necesarias para el consumidor.
 
-El starter no debe convertirse en un contenedor de lógica de negocio ni duplicar la lógica de `forge-web-autoconfigure`.
+El Starter no debe convertirse en un contenedor de lógica de negocio ni duplicar la lógica de `forge-web-autoconfigure`.
 
 La implementación concreta de las funcionalidades dependientes de Spring debe permanecer en los módulos correspondientes.
 
@@ -252,23 +258,24 @@ Forge no requiere que el `@RestControllerAdvice` del consumidor extienda una cla
 
 Forge proporciona modelos para respuestas exitosas, pero no obliga a la aplicación a utilizarlos.
 
-El consumidor puede utilizar:
+El consumidor puede utilizar sus propios modelos:
 
 ```java
-CreateUserRequest create(@Valid @RequestBody CreateUserRequest request)
+CreateUserResponse create(
+        @Valid @RequestBody CreateUserRequest request)
 ```
 
-o:
+o utilizar explícitamente:
 
 ```java
-SuccessResponse<CreateUserRequest> create(
+SuccessResponse<CreateUserResponse> create(
         @Valid @RequestBody CreateUserRequest request)
 ```
 
 o:
 
 ```java
-ResponseEntity<SuccessResponse<CreateUserRequest>> create(
+ResponseEntity<SuccessResponse<CreateUserResponse>> create(
         @Valid @RequestBody CreateUserRequest request)
 ```
 
@@ -295,9 +302,27 @@ Forge no obliga al consumidor a definir códigos internos específicos para cada
 
 La aplicación puede utilizar códigos propios cuando necesite una identificación más específica.
 
+El diseño de los errores toma como referencia los principios de **Problem Details for HTTP APIs (RFC 9457)** cuando son aplicables.
+
 ---
 
-# 12. AutoConfiguration
+# 12. Serialización
+
+Forge mantiene los modelos del Core independientes de Jackson.
+
+La integración con Jackson pertenece al módulo `forge-web-autoconfigure` y es opcional.
+
+Cuando Jackson está disponible, Forge puede aplicar reglas específicas de serialización mediante mecanismos de integración como Jackson Mixins.
+
+La política de serialización evita incluir propiedades `null` o valores vacíos cuando no aportan información al consumidor.
+
+Las respuestas exitosas mantienen `data` en el contrato incluso cuando su valor sea `null`.
+
+Esta integración no introduce una dependencia de Jackson en `forge-web-core`.
+
+---
+
+# 13. AutoConfiguration
 
 La integración automática debe seguir las convenciones de Spring Boot.
 
@@ -320,7 +345,7 @@ Forge no debe modificar propiedades globales de la aplicación sin una configura
 
 ---
 
-# 13. API pública
+# 14. API pública
 
 Todo elemento `public` expuesto por Forge debe considerarse parte potencial del contrato público.
 
@@ -329,34 +354,6 @@ Antes de hacer público un tipo debe existir una razón concreta.
 Preferir visibilidad restringida para componentes internos.
 
 No deben exponerse clases internas, helpers o implementaciones únicamente porque sean utilizadas por otros componentes del mismo módulo.
-
----
-
-# 14. Evolución modular
-
-Las funcionalidades futuras deberán incorporarse de forma independiente siempre que sea razonablemente posible.
-
-Por ejemplo:
-
-```text
-v1.0
-│
-├── Responses
-├── Errors
-├── Exception Handling
-└── Spring Boot Integration
-
-future
-│
-├── Request ID
-├── HTTP Logging
-├── Observability
-└── ...
-```
-
-La existencia de una posible funcionalidad futura no justifica introducir anticipadamente sus abstracciones.
-
-Cada nueva funcionalidad deberá integrarse cuando exista una necesidad concreta y observable.
 
 ---
 
@@ -369,24 +366,43 @@ Forge no pretende:
 * imponer una arquitectura de aplicación;
 * abstraer todas las APIs de Spring;
 * proporcionar una solución para todos los problemas web;
+* proporcionar mecanismos propios de Request ID;
+* implementar trazabilidad distribuida;
+* proporcionar logging HTTP;
+* implementar una plataforma general de observabilidad;
 * anticipar funcionalidades futuras mediante capas o abstracciones innecesarias.
 
-Forge proporciona una base técnica pequeña y reutilizable.
+Forge proporciona una base técnica pequeña y reutilizable para la estandarización de respuestas HTTP y el manejo de errores.
 
 ---
 
-# 16. Regla arquitectónica principal
+# 16. Evolución de la arquitectura
+
+Forge no mantiene una lista de funcionalidades futuras que deban implementarse obligatoriamente.
+
+Una nueva funcionalidad debe incorporarse únicamente cuando exista una necesidad concreta y observable.
+
+Antes de crear un nuevo módulo, interfaz, abstracción o patrón debe determinarse:
+
+1. qué problema concreto resuelve;
+2. quién consume la funcionalidad;
+3. si existe una API estándar que ya lo resuelva;
+4. si puede implementarse de forma más sencilla;
+5. si necesita realmente ser extensible;
+6. si debe formar parte de la API pública;
+7. si pertenece al ámbito de responsabilidad de Forge;
+8. si puede incorporarse sin afectar funcionalidades existentes.
+
+Una funcionalidad que pertenezca claramente a otro ámbito debe permanecer fuera de Forge.
+
+---
+
+# 17. Regla arquitectónica principal
 
 La arquitectura de Forge debe evolucionar desde las necesidades reales del producto.
 
-Antes de crear un nuevo módulo, interfaz, abstracción o patrón debe responderse:
+No se introducirán componentes únicamente porque sean técnicamente posibles.
 
-1. ¿Qué problema concreto resuelve?
-2. ¿Quién consume esta funcionalidad?
-3. ¿Existe una API estándar que ya lo resuelva?
-4. ¿Puede implementarse de forma más sencilla?
-5. ¿Necesita realmente ser extensible?
-6. ¿Debe formar parte de la API pública?
-7. ¿Puede incorporarse sin afectar funcionalidades existentes?
+Cada módulo, clase, dependencia y abstracción debe justificar su existencia mediante un beneficio concreto para el consumidor.
 
 Si una abstracción no aporta un beneficio observable al consumidor, no debe introducirse.

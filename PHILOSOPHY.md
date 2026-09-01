@@ -8,26 +8,25 @@
 
 Forge nace con una idea sencilla:
 
-**Las aplicaciones web no deberían reinventar los mismos componentes una y otra vez.**
+**Las aplicaciones web no deberían reinventar los mismos componentes técnicos una y otra vez.**
 
 En la mayoría de proyectos Spring Boot es común encontrar implementaciones similares para:
 
 * respuestas HTTP;
 * manejo de excepciones;
-* trazabilidad;
-* logging;
 * validaciones;
-* configuración.
+* configuración de integración;
+* serialización de respuestas.
 
 Aunque cambie el dominio del negocio, estos problemas técnicos suelen repetirse.
 
-Forge existe para proporcionar soluciones reutilizables y consistentes para estos problemas, incorporándolas de forma gradual y únicamente cuando aporten un valor concreto.
+Forge existe para proporcionar soluciones reutilizables y consistentes para estos problemas, incorporándolas únicamente cuando aporten un valor concreto.
 
 ---
 
 # Nuestra misión
 
-Permitir que los desarrolladores se concentren en resolver problemas de negocio mientras Forge proporciona una infraestructura web consistente, reutilizable y fácil de adoptar.
+Permitir que los desarrolladores se concentren en resolver problemas de negocio mientras Forge proporciona una base técnica consistente para la comunicación HTTP y el manejo de errores en aplicaciones Spring Boot.
 
 El objetivo no es reemplazar Spring Boot, sino complementarlo cuando exista una necesidad real de estandarización.
 
@@ -43,7 +42,9 @@ La API pública debe ser intuitiva.
 
 Los casos de uso comunes deben funcionar con la menor cantidad de configuración posible.
 
-Las capacidades avanzadas podrán existir cuando exista una necesidad concreta, pero nunca deben complicar el camino principal.
+Las capacidades adicionales podrán existir cuando exista una necesidad concreta, pero nunca deben complicar el camino principal.
+
+Una solución más pequeña y clara es preferible a una solución más general que resuelva problemas hipotéticos.
 
 ---
 
@@ -53,13 +54,15 @@ Forge proporciona comportamientos predeterminados bien definidos.
 
 La personalización será posible cuando exista una necesidad legítima, pero el caso común debe funcionar desde el primer momento.
 
+La configuración no debe ser un requisito para utilizar las funcionalidades básicas.
+
 ---
 
 ## El Core no pertenece a ningún framework
 
 El núcleo de Forge debe permanecer independiente de tecnologías específicas.
 
-`forge-web-core` no depende de Spring Boot, Servlet, WebFlux ni de otros frameworks.
+`forge-web-core` no depende de Spring Boot, Spring Framework, Servlet, WebFlux, Reactor, Jackson ni de otros frameworks.
 
 La integración específica con Spring pertenece a los módulos correspondientes.
 
@@ -87,6 +90,8 @@ Forge prefiere soluciones simples y consistentes antes que múltiples alternativ
 
 Todo lo que forme parte de la API pública debe considerarse un contrato.
 
+La API pública debe crecer únicamente cuando exista una necesidad concreta que justifique su incorporación.
+
 ---
 
 ## Inmutabilidad por defecto
@@ -111,11 +116,13 @@ Cuando una aplicación necesite sustituir un comportamiento proporcionado por Fo
 
 ## Consistencia sobre creatividad
 
-Dos aplicaciones que utilizan Forge deberían presentar convenciones similares.
+Las aplicaciones que utilizan Forge deberían presentar convenciones similares.
 
-Las respuestas, excepciones y mecanismos de integración deben comportarse de forma uniforme.
+Las respuestas, errores y mecanismos de integración deben comportarse de forma uniforme.
 
 La consistencia facilita el mantenimiento y reduce la curva de aprendizaje.
+
+Forge no busca ofrecer múltiples formas de resolver el mismo problema cuando una convención clara sea suficiente.
 
 ---
 
@@ -151,13 +158,32 @@ Forge no intentará resolver todos los problemas del desarrollo web.
 
 Forge no pretende proporcionar una abstracción propia para cada API existente en Java, HTTP o Spring.
 
-Forge se concentra en proporcionar una base técnica consistente para aplicaciones web cuando exista un problema recurrente que justifique estandarización.
+Forge no pretende convertirse en una plataforma de observabilidad, logging o tracing.
+
+Forge no proporciona mecanismos propios para:
+
+* Request ID;
+* correlation ID;
+* MDC;
+* tracing distribuido;
+* logging HTTP;
+* autenticación;
+* autorización;
+* persistencia de información de trazabilidad.
+
+Forge se concentra en proporcionar una base técnica pequeña y consistente para:
+
+* respuestas HTTP;
+* manejo de errores;
+* integración con Spring Boot;
+* validación de contratos;
+* integración opcional con mecanismos de serialización.
 
 ---
 
 # Principios de evolución
 
-Cada nueva funcionalidad deberá responder afirmativamente a las siguientes preguntas:
+Cada nueva funcionalidad deberá evaluarse mediante las siguientes preguntas:
 
 * ¿Resuelve un problema recurrente?
 * ¿Reduce código repetitivo o complejidad en la aplicación?
@@ -168,24 +194,31 @@ Cada nueva funcionalidad deberá responder afirmativamente a las siguientes preg
 * ¿Puede incorporarse de forma independiente?
 * ¿Puede mantenerse a largo plazo?
 * ¿Permite al consumidor sustituir el comportamiento cuando exista una necesidad legítima?
+* ¿Pertenece realmente al ámbito de responsabilidad de Forge?
 
 Si una funcionalidad no aporta un beneficio observable al consumidor, deberá replantearse antes de incorporarse.
+
+Una funcionalidad que pueda resolverse adecuadamente mediante una librería, estándar o componente especializado externo no debe incorporarse a Forge únicamente porque técnicamente sea posible hacerlo.
 
 ---
 
 # Calidad antes que cantidad
 
-Forge crecerá de forma gradual.
+Forge crecerá únicamente cuando exista una necesidad concreta.
 
 Se priorizarán componentes estables, bien documentados y probados antes que incorporar un gran número de funcionalidades.
 
 Una librería pequeña y confiable siempre será preferible a una librería extensa y difícil de mantener.
 
+No existe un objetivo de cantidad de funcionalidades.
+
+El tamaño de Forge debe estar determinado por el valor que proporciona, no por la cantidad de código que contiene.
+
 ---
 
 # Nuestro compromiso
 
-Forge busca convertirse en una base sólida para aplicaciones Spring Boot modernas.
+Forge busca proporcionar una base sólida, pequeña y predecible para aplicaciones Spring Boot modernas.
 
 Cada línea de código deberá perseguir los siguientes objetivos:
 
@@ -197,3 +230,5 @@ Cada línea de código deberá perseguir los siguientes objetivos:
 * evolución controlada.
 
 Estos principios representan la identidad del proyecto y deberán mantenerse independientemente de su evolución.
+
+**Forge no debe crecer por cantidad de funcionalidades, sino por valor aportado.**

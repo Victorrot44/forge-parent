@@ -60,7 +60,6 @@ Los paquetes representan responsabilidades concretas.
 Ejemplos:
 
 ```text
-context/
 error/
 exception/
 response/
@@ -162,11 +161,13 @@ Preferir composición cuando proporcione un diseño más simple y claro.
 
 # Uso de `final`
 
-Las clases concretas deben declararse `final` cuando no exista una razón para permitir herencia.
+Las clases concretas pueden declararse `final` cuando no exista una razón para permitir herencia.
 
 No hacer una clase extensible simplemente por precaución.
 
 La extensibilidad debe ser intencional.
+
+Cuando una clase sea gestionada por Spring, debe considerarse además la necesidad de proxies y mecanismos de extensión utilizados por el framework antes de declararla `final`.
 
 ---
 
@@ -200,6 +201,8 @@ Cuando exista una alternativa claramente superior, pueden utilizarse:
 * `Optional` en retornos apropiados.
 
 No convertir la eliminación absoluta de `null` en una regla artificial.
+
+La serialización puede decidir omitir valores `null` cuando esto forme parte del contrato de representación de la respuesta.
 
 ---
 
@@ -346,6 +349,27 @@ El Core puede definir modelos y contratos relacionados con el dominio funcional 
 
 ---
 
+# Integración con Jackson
+
+Jackson es una tecnología de integración y no forma parte del Core.
+
+Las funcionalidades relacionadas con serialización deben permanecer fuera de `forge-web-core`.
+
+Cuando Jackson esté disponible, Forge puede proporcionar integración mediante mecanismos públicos de Spring Boot y Jackson, como Mixins.
+
+La integración debe:
+
+* ser opcional;
+* evitar introducir Jackson en el Core;
+* modificar únicamente la representación serializada;
+* no alterar el modelo ni el contrato Java de las respuestas;
+* evitar valores `null` o vacíos cuando la política de serialización lo establezca;
+* mantener los campos requeridos del contrato aunque su valor sea `null`.
+
+No crear modelos paralelos únicamente para resolver necesidades de serialización cuando un mecanismo estándar de Jackson sea suficiente.
+
+---
+
 # API pública
 
 Todo elemento público de Forge debe considerarse un contrato.
@@ -464,6 +488,33 @@ El Core debe concentrarse en:
 
 ---
 
+# Límites de Forge
+
+Forge Web se concentra en:
+
+* contratos de respuesta HTTP;
+* respuestas exitosas;
+* respuestas de error;
+* manejo global de errores Spring MVC;
+* validación del contrato;
+* integración con Spring Boot;
+* integración opcional con mecanismos de serialización.
+
+No deben incorporarse al proyecto funcionalidades cuyo propósito principal pertenezca a otros ámbitos, como:
+
+* generación de Request ID;
+* propagación de Request ID;
+* correlation ID;
+* MDC;
+* tracing distribuido;
+* logging HTTP;
+* almacenamiento de información de trazabilidad;
+* plataforma general de observabilidad.
+
+Cuando una aplicación necesite estas capacidades, deberá utilizar las herramientas o librerías especializadas correspondientes.
+
+---
+
 # Regla de oro
 
 Antes de crear una nueva clase, interfaz, abstracción o módulo, pregúntate:
@@ -475,6 +526,7 @@ Antes de crear una nueva clase, interfaz, abstracción o módulo, pregúntate:
 * ¿Puede simplificarse?
 * ¿Es necesario exponerlo públicamente?
 * ¿Respeta la filosofía de Forge?
+* ¿Está dentro del alcance de Forge?
 
 Si la respuesta es negativa, replantea el diseño antes de continuar.
 

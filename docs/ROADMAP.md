@@ -2,26 +2,29 @@
 
 > **Proyecto:** Forge Web
 
-Este documento describe la evolución planificada de Forge.
+Este documento describe la evolución y el alcance de Forge Web.
 
-El roadmap representa una dirección de desarrollo y no constituye un compromiso de implementación. Las funcionalidades pueden cambiar, dividirse, posponerse o eliminarse cuando exista una justificación técnica.
+Forge evoluciona de forma incremental y únicamente incorpora funcionalidades que resuelven problemas concretos relacionados con la estandarización de respuestas HTTP y el manejo de errores en aplicaciones Spring Boot.
 
-Forge evoluciona de forma incremental: cada versión debe resolver problemas concretos sin introducir complejidad innecesaria.
+El roadmap no constituye un compromiso de implementación. Las funcionalidades futuras podrán cambiar, posponerse o eliminarse cuando exista una justificación técnica.
 
 ---
 
 # Estado del proyecto
 
-| Versión | Estado           |
-| ------- | ---------------- |
-| 1.0.0   | ✅ Base estable   |
-| 1.1.x   | 📋 Planificada   |
-| 1.2.x   | 💡 Candidata     |
-| 2.x     | 💡 Visión futura |
+| Versión | Estado                       |
+| ------- | ---------------------------- |
+| 1.0.x   | ✅ Base estable               |
+| 1.1.x   | 📋 Evolución según necesidad |
+| 2.x     | 💡 Sin planificación         |
+
+Forge Web se considera **estable en su alcance actual**.
+
+Las versiones futuras no representan funcionalidades comprometidas y solo deberán crearse cuando exista una necesidad real que pertenezca al propósito de Forge.
 
 ---
 
-# Versión 1.0.0
+# Versión 1.0.x
 
 ## Estado
 
@@ -29,16 +32,23 @@ Forge evoluciona de forma incremental: cada versión debe resolver problemas con
 
 ## Objetivo
 
-Establecer los cimientos de Forge mediante:
+Establecer una base sencilla y reutilizable para estandarizar las respuestas HTTP y el manejo global de errores en aplicaciones Spring Boot.
+
+La versión incluye:
 
 * modelos estandarizados de respuesta;
 * construcción sencilla de respuestas;
+* respuestas exitosas y de error consistentes;
 * manejo centralizado de excepciones Spring MVC;
 * catálogo básico de tipos de error;
 * validaciones del contrato de respuesta;
 * integración automática con Spring Boot;
 * arquitectura modular;
-* Core independiente de Spring.
+* Core independiente de Spring;
+* serialización configurable mediante integración opcional con Jackson;
+* exclusión de propiedades `null` y valores vacíos cuando corresponde;
+* soporte de `data` en respuestas exitosas incluso cuando su valor es `null`;
+* utilización de Problem Details como referencia para el diseño de errores HTTP.
 
 ---
 
@@ -84,6 +94,7 @@ Establecer los cimientos de Forge mediante:
 * ✅ configuración condicional
 * ✅ registro automático mediante `AutoConfiguration.imports`
 * ✅ integración del manejo global de excepciones
+* ✅ integración opcional con Jackson
 
 ### Exception Handling
 
@@ -117,6 +128,8 @@ Establecer los cimientos de Forge mediante:
 * ✅ pruebas del exception handler
 * ✅ pruebas de AutoConfiguration
 * ✅ pruebas de escenarios HTTP representativos
+* ✅ pruebas de serialización de respuestas exitosas
+* ✅ pruebas de serialización de respuestas de error
 
 ---
 
@@ -133,82 +146,61 @@ Establecer los cimientos de Forge mediante:
 
 ---
 
-# Versión 1.1.x
+# Fuera del alcance actual
 
-## Objetivo
+Las siguientes funcionalidades fueron evaluadas durante el desarrollo, pero no forman parte de Forge Web actualmente.
 
-Incorporar funcionalidades de infraestructura web que proporcionen valor directo sin alterar innecesariamente el contrato base de Forge.
+## Request ID y trazabilidad
 
-### Candidatos
+Forge Web **no proporciona mecanismos propios de generación, validación o propagación de Request ID**.
 
-* Request ID
-* contexto de ejecución de la petición
-* propagación de Request ID
-* integración con MDC
-* logging HTTP
-* configuración opcional de Request ID
-* personalización controlada del comportamiento HTTP
+La trazabilidad de solicitudes pertenece al ámbito de observabilidad y tracing, donde existen estándares y soluciones especializadas.
 
-Estas funcionalidades deberán diseñarse individualmente.
+Forge tampoco incorpora:
 
-No se debe crear una arquitectura completa de contexto, logging u observabilidad antes de conocer los requisitos concretos de cada funcionalidad.
+* generación automática de Request ID;
+* propagación de Request ID;
+* integración con MDC;
+* almacenamiento de Request ID;
+* contexto global de ejecución;
+* correlación distribuida.
 
----
+Estas responsabilidades pueden ser proporcionadas por la aplicación consumidora mediante las herramientas de observabilidad que considere apropiadas.
 
-# Versión 1.2.x
+## Logging y observabilidad
 
-## Objetivo
+Forge Web no pretende convertirse en una librería general de logging u observabilidad.
 
-Mejorar las capacidades de observabilidad e integración cuando exista una necesidad concreta.
+Quedan fuera de su alcance:
 
-### Candidatos
-
-* Micrometer
-* métricas HTTP
-* integración con OpenTelemetry
-* correlation ID
-* propagación distribuida de contexto
-* integración con clientes HTTP
-
-La inclusión de cada funcionalidad deberá evaluarse de forma independiente.
-
----
-
-# Versión 2.x
-
-## Visión
-
-Explorar soporte para aplicaciones reactivas y otros modelos de ejecución cuando la arquitectura actual y la demanda del proyecto lo justifiquen.
-
-### Candidatos
-
-* WebFlux
-* Reactor Context
-* contexto reactivo
-* integración con aplicaciones reactivas
-
-No se introducirán abstracciones en la versión 1.x únicamente para anticipar este escenario.
-
----
-
-# Ideas futuras
-
-Estas funcionalidades son ideas y no forman parte del roadmap comprometido:
-
-* internacionalización avanzada;
-* catálogos de errores configurables;
-* integración con Problem Details (RFC 9457);
-* cliente HTTP unificado;
-* integración con Spring Security;
+* logging HTTP;
+* métricas HTTP;
+* integración específica con Micrometer;
+* integración específica con OpenTelemetry;
 * auditoría distribuida;
-* OpenAPI;
-* GraphQL;
-* gRPC;
-* sistema de eventos internos;
-* soporte específico para Kotlin;
-* integraciones adicionales de observabilidad.
+* sistemas de correlación;
+* tracing distribuido.
 
-Cada idea deberá evaluarse individualmente antes de convertirse en una funcionalidad planificada.
+Estas funcionalidades deberán utilizar las herramientas y estándares apropiados cuando sean necesarias.
+
+---
+
+# Evolución futura
+
+No existen funcionalidades comprometidas para una versión posterior.
+
+Una nueva versión de Forge deberá originarse a partir de una necesidad concreta identificada en aplicaciones consumidoras.
+
+Antes de agregar una nueva funcionalidad deberá determinarse si:
+
+1. pertenece realmente al propósito de Forge;
+2. no existe una solución adecuada en Java, Spring o un estándar de la industria;
+3. proporciona un beneficio observable al consumidor;
+4. puede incorporarse sin aumentar innecesariamente la API pública;
+5. puede implementarse de forma independiente;
+6. no introduce abstracciones especulativas.
+
+Si una funcionalidad pertenece claramente a otro ámbito, deberá mantenerse fuera de Forge.
 
 ---
 
@@ -217,21 +209,22 @@ Cada idea deberá evaluarse individualmente antes de convertirse en una funciona
 Antes de incorporar una funcionalidad deberá responderse:
 
 * ¿Resuelve un problema real?
+* ¿Está relacionado directamente con la estandarización HTTP o el manejo de errores?
 * ¿Reduce código repetitivo?
 * ¿Aporta un beneficio observable al consumidor?
-* ¿Puede implementarse con APIs existentes de Java, Spring o estándares de la industria?
+* ¿Puede implementarse utilizando APIs existentes de Java, Spring o estándares de la industria?
 * ¿Mantiene pequeña la API pública?
 * ¿Evita abstracciones especulativas?
 * ¿Respeta la independencia del Core?
 * ¿Puede incorporarse sin afectar funcionalidades existentes?
 
-Si la funcionalidad no aporta suficiente valor, no deberá incorporarse únicamente porque sea técnicamente posible.
+Si la respuesta no justifica claramente la incorporación, la funcionalidad no deberá agregarse únicamente porque sea técnicamente posible.
 
 ---
 
 # Criterios para una nueva versión
 
-Una versión debe considerarse lista cuando:
+Una nueva versión debe considerarse lista cuando:
 
 * la API pública está definida;
 * las pruebas cubren los escenarios relevantes;
@@ -251,4 +244,6 @@ Forge prioriza:
 
 Una versión pequeña y confiable es preferible a una versión grande que introduzca abstracciones innecesarias.
 
-El roadmap debe evolucionar junto con las necesidades reales del proyecto y no convertirse en una lista de funcionalidades que deban implementarse únicamente porque fueron escritas con anterioridad.
+El roadmap no debe convertirse en una lista de funcionalidades que deban implementarse únicamente porque fueron escritas con anterioridad.
+
+Forge deberá evolucionar únicamente cuando exista una necesidad real y esa necesidad pertenezca al propósito del proyecto.
