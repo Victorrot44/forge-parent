@@ -1,1 +1,2 @@
 io.github.victorrot44.forge.web.autoconfigure.ForgeWebAutoConfiguration
+io.github.victorrot44.forge.web.autoconfigure.jackson.ForgeWebJacksonAutoConfiguration
