@@ -1,5 +1,6 @@
 package io.github.victorrot44.forge.web.core.util;
 
+import java.util.List;
 import java.util.Map;
 
 public final class Preconditions {
@@ -10,6 +11,10 @@ public final class Preconditions {
 
     public static <K, V> Map<K, V> immutableMap(Map<K, V> map) {
         return (map == null) ? Map.of() : Map.copyOf(map);
+    }
+    
+    public static <T> List<T> immutableList(List<T> list) {
+        return (list == null) ? List.of() : List.copyOf(list);
     }
 
     public static String requireNotNullOrEmpty(String value) {

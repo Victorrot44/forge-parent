@@ -1,5 +1,6 @@
 package io.github.victorrot44.forge.web.core.response;
 
+import io.github.victorrot44.forge.web.core.util.Preconditions;
 import java.util.Map;
 
 public record ApiMetadata(
@@ -7,9 +8,7 @@ public record ApiMetadata(
         Map<String, Object> attributes
 ) {
     public ApiMetadata {
-        attributes = (attributes == null || attributes.isEmpty())
-                ? Map.of()
-                : Map.copyOf(attributes);
+        attributes = Preconditions.immutableMap(attributes);
     }
 
 }

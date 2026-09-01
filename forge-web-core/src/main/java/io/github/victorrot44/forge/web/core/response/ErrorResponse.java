@@ -2,12 +2,12 @@ package io.github.victorrot44.forge.web.core.response;
 
 import io.github.victorrot44.forge.web.core.response.builder.AbstractResponseBuilder;
 import io.github.victorrot44.forge.web.core.response.validator.ResponseValidator;
+import io.github.victorrot44.forge.web.core.util.Preconditions;
 
 import java.time.Instant;
 import java.util.*;
 
 public record ErrorResponse(
-        String requestId,
         Instant timestamp,
         int httpStatus,
         String code,
@@ -42,7 +42,7 @@ public record ErrorResponse(
 
         public ErrorResponse build() {
             validate();
-            return new ErrorResponse(requestId, timestamp, httpStatus, code, message, errors, buildMetadata(null));
+            return new ErrorResponse(timestamp, httpStatus, code, message, errors, buildMetadata(null));
         }
 
     }
@@ -52,7 +52,7 @@ public record ErrorResponse(
     }
 
     public ErrorResponse {
-        errors = (errors == null) ? List.of() : List.copyOf(errors);
+        errors = Preconditions.immutableList(errors);
         ResponseValidator.validateErrorResponse(message, code, httpStatus);
     }
 

@@ -10,7 +10,6 @@ import java.util.Map;
 
 public abstract class AbstractResponseBuilder<T extends AbstractResponseBuilder<T>> {
 
-    protected String requestId;
     protected final Instant timestamp;
     protected int httpStatus;
     protected String code;
@@ -23,11 +22,6 @@ public abstract class AbstractResponseBuilder<T extends AbstractResponseBuilder<
     }
 
     protected abstract T self();
-
-    public T requestId(String requestId) {
-        this.requestId = requestId;
-        return self();
-    }
 
     public T httpStatus(int httpStatus) {
         this.httpStatus = httpStatus;
